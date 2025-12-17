@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="557.0" prefWidth="896.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.course.loadmonitorstudents.controller.StudentController">
+    <children>
+        <TabPane layoutX="-1.0" layoutY="-1.0" prefHeight="557.0" prefWidth="1153.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="настройки">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="311.0">
+                            <children>
+                                <Button fx:id="addButtons" layoutX="395.0" layoutY="227.0" mnemonicParsing="false" text="Добавить" />
+                                <Button fx:id="updateButtons" layoutX="683.0" layoutY="227.0" mnemonicParsing="false" text="Изменить" />
+                                <Button fx:id="deleteButtons" layoutX="537.0" layoutY="227.0" mnemonicParsing="false" text="Отвязать" />
+                                <TextField fx:id="passwordInput" layoutX="165.0" layoutY="154.0" text="telegram" />
+                        <TextField fx:id="passwordInput1" layoutX="873.0" layoutY="154.0" text="пароль" />
+                        <TextField fx:id="passwordInput2" layoutX="502.0" layoutY="154.0" text="google calendar" />
+                        <TableView layoutX="61.0" layoutY="73.0" prefHeight="64.0" prefWidth="1048.0">
+                          <columns>
+                            <TableColumn prefWidth="364.0" text="telegram" />
+                            <TableColumn prefWidth="319.0" text="google calendar" />
+                              <TableColumn minWidth="0.0" prefWidth="360.0" text="пароль" />
+                          </columns>
+                        </TableView>
+                            </children></AnchorPane>
+                    </content>
+                </Tab>
+                <Tab text="задачи">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <TableView fx:id="taskTable" layoutX="321.0" layoutY="25.0" prefHeight="477.0" prefWidth="813.0">
+                                    <columns>
+                                        <TableColumn fx:id="idColumnt" prefWidth="38.0" text="ID" />
+                                        <TableColumn fx:id="titleColumn" prefWidth="103.0" text="название" />
+                                        <TableColumn fx:id="descriptionColumn" prefWidth="84.0" text="описание" />
+                                        <TableColumn fx:id="statusColumn" prefWidth="62.0" text="статус" />
+                                        <TableColumn fx:id="deadlineColumn" prefWidth="76.0" text="дедлайн" />
+                                        <TableColumn fx:id="startColumn" prefWidth="76.0" text="старт" />
+                                        <TableColumn fx:id="endColumn" prefWidth="102.0" text="сдача" />
+                                        <TableColumn fx:id="idCuratorColumn" prefWidth="102.0" text="ID куратор " />
+                                        <TableColumn fx:id="curatorSNColumn" prefWidth="169.0" text="куратор " />
+                                    </columns>
+                                </TableView>
+                                <Button fx:id="addButtont" layoutX="90.0" layoutY="221.0" mnemonicParsing="false" onAction="#onAddButtontClick" text="Начать/Закончить" />
+                                <TextField fx:id="idInputt" layoutX="73.0" layoutY="71.0" text="ID" />
+                                <TextField fx:id="startInput" layoutX="74.0" layoutY="119.0" text="старт" />
+                                <ComboBox fx:id="filtrInputt" layoutX="33.0" layoutY="292.0" prefWidth="150.0">
+                                    <items>
+                                        <FXCollections fx:factory="observableArrayList">
+                                            <String fx:value="Статус" />
+                                            <String fx:value="Дедлайн" />
+                                            <String fx:value="Фамилия и имя" />
+                                            <String fx:value="ID" />
+                                        </FXCollections>
+                                    </items>
+                                </ComboBox>
+                                <CheckBox fx:id="descInputt" layoutX="204.0" layoutY="296.0" mnemonicParsing="false" text="по убыванию" />
+                                <Button fx:id="filterButtont" layoutX="33.0" layoutY="337.0" mnemonicParsing="false" text="отфильровать" />
+                        <TextField fx:id="endInput" layoutX="73.0" layoutY="160.0" text="сдача" />
+                        <Button fx:id="calendarInputt" layoutX="92.0" layoutY="455.0" mnemonicParsing="false" text="подтянуть в google calendar" />
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>
