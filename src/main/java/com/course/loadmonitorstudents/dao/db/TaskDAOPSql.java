@@ -40,9 +40,9 @@ public class TaskDAOPSql implements TaskDAO {
     @Override
     public void create(Task task) throws SQLException {
         String sql = """
-            INSERT INTO tasks(title, description, deadline, start_work, end_work, status, student_id, curator_id)
-            VALUES (?, ?, ?, ?, ?, ?::status_task_type, ?, ?)
-        """;
+                        INSERT INTO tasks(title, description, deadline, start_work, end_work, status, student_id, curator_id) 
+                        VALUES (?, ?, ?, ?, ?, ?::status_task_type, ?, ?)
+                     """;
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -63,10 +63,10 @@ public class TaskDAOPSql implements TaskDAO {
     @Override
     public void update(Task task) throws SQLException {
         String sql = """
-            UPDATE tasks SET title=?, description=?, deadline=?, start_work=?, end_work=?,
-                             status=?::status_task_type, student_id=?, curator_id=?
-            WHERE id=?
-        """;
+                        UPDATE tasks SET title=?, description=?, deadline=?, start_work=?, end_work=?, 
+                                         status=?::status_task_type, student_id=?, curator_id=? 
+                        WHERE id=? 
+                     """;
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -127,12 +127,12 @@ public class TaskDAOPSql implements TaskDAO {
 
     @Override
     public Task getTaskByIdAndTaskId(Long idTask, Long id) throws SQLException {
-        String sql = "SELECT * FROM tasks WHERE id = ? AND task_id = ?";
+        String sql = "SELECT * FROM tasks WHERE id = ? AND student_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setLong(1, id);
-            stmt.setLong(2, idTask);
+            stmt.setLong(1, idTask);
+            stmt.setLong(2, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return map(rs);
             return null;
@@ -142,22 +142,20 @@ public class TaskDAOPSql implements TaskDAO {
     @Override
     public List<TaskWithStudentDTO> findAllTasksWithStudentByCuratorId(Long curatorId) throws SQLException {
         String sql = """
-                            SELECT 
-                                t.id, 
-                                t.title, 
-                                t.description, 
-                                t.status, 
-                                t.deadline,
-                                t.start_work,
-                                t.end_work,
-                                u.lastname as student_last_name,
-                                u.firstname as student_first_name,
-                                u.id as student_id
-                            FROM tasks t
-                            JOIN users u ON t.student_id = u.id
-                            WHERE t.curator_id = ?
-                            ORDER BY t.deadline, t.id
-                        """;
+                        SELECT 
+                            t.id, 
+                            t.title, 
+                            t.description, 
+                            t.status, 
+                            t.deadline, 
+                            t.start_work, 
+                            t.end_work, 
+                            u.lastname as student_last_name, 
+                            u.firstname as student_first_name, 
+                            u.id as student_id 
+                        FROM tasks t JOIN users u ON t.student_id = u.id 
+                        WHERE t.curator_id = ? ORDER BY t.deadline, t.id
+                       """;
 
         List<TaskWithStudentDTO> tasks = new ArrayList<>();
 
@@ -191,15 +189,22 @@ public class TaskDAOPSql implements TaskDAO {
     @Override
     public List<TaskWithStudentDTO> findTasksByStatus(Long curatorId, String status, boolean descending) throws SQLException {
         String order = descending ? "DESC" : "ASC";
-        String sql = String.format("""
-                                        SELECT 
-                                            t.id, t.title, t.description, t.status, t.deadline,
-                                            t.start_work, t.end_work, u.lastname, u.firstname, u.id as student_id
-                                        FROM tasks t
-                                        JOIN users u ON t.student_id = u.id
-                                        WHERE t.curator_id = ? AND t.status = ?::status_task_type
-                                        ORDER BY t.deadline %s, t.id %s
-                                    """, order, order);
+        String sql = String.format(""" 
+                        SELECT 
+                            t.id, 
+                            t.title, 
+                            t.description, 
+                            t.status, 
+                            t.deadline,
+                            t.start_work, 
+                            t.end_work, 
+                            u.lastname, 
+                            u.firstname, 
+                            u.id as student_id 
+                        FROM tasks t JOIN users u ON t.student_id = u.id 
+                        WHERE t.curator_id = ? AND t.status = ?::status_task_type 
+                        ORDER BY t.deadline %s, t.id %s " +
+                        """, order, order);
 
         return executeTaskQuery(sql, curatorId, status);
     }
@@ -391,16 +396,22 @@ public class TaskDAOPSql implements TaskDAO {
     @Override
     public List<TaskWithCuratorDTO> findTaskByIdForStudent(Long studentId, Long taskId, boolean descending) throws SQLException {
         String order = descending ? "DESC" : "ASC";
-        String sql = String.format("""
+        String sql = String.format("""        
                                         SELECT 
-                                            t.id, t.title, t.description, t.status, t.deadline,
-                                            t.start_work, t.end_work, t.curator_id,
-                                            u.firstname as curator_first_name, u.lastname as curator_last_name
-                                        FROM tasks t
-                                        JOIN users u ON t.curator_id = u.id
-                                        WHERE t.student_id = ? AND t.id = ?
+                                            t.id, 
+                                            t.title, 
+                                            t.description, 
+                                            t.status, 
+                                            t.deadline,
+                                            t.start_work, 
+                                            t.end_work, 
+                                            t.curator_id, 
+                                            u.firstname as curator_first_name, 
+                                            u.lastname as curator_last_name 
+                                        FROM tasks t JOIN users u ON t.curator_id = u.id 
+                                        WHERE t.student_id = ? AND t.id = ? 
                                         ORDER BY t.id %s
-                                    """, order);
+                                  """, order);
 
         return executeStudentTaskQuery(sql, studentId, taskId);
     }

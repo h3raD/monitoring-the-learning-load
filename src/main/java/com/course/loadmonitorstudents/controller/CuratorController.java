@@ -10,7 +10,9 @@ import com.course.loadmonitorstudents.model.Role;
 import com.course.loadmonitorstudents.model.StatusTask;
 import com.course.loadmonitorstudents.model.Task;
 import com.course.loadmonitorstudents.model.User;
-import com.course.loadmonitorstudents.util.PdfReportGenerator;
+import com.course.loadmonitorstudents.service.PdfReportGenerator;
+import com.course.loadmonitorstudents.service.TelegramNotificationService;
+import com.course.loadmonitorstudents.util.PasswordUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,27 +32,15 @@ import static com.course.loadmonitorstudents.util.Checker.noSpacesNoDigits;
 
 public class CuratorController {
 
-    private UserDAO userDAO = new UserDAOPSql();
-    private TaskDAO taskDAO = new TaskDAOPSql();
+    private final UserDAO userDAO = new UserDAOPSql();
+    private final TaskDAO taskDAO = new TaskDAOPSql();
 
-    private ObservableList<User> studentData = FXCollections.observableArrayList();
+    private final ObservableList<User> studentData = FXCollections.observableArrayList();
 
-    private ObservableList<TaskWithStudentDTO> taskData = FXCollections.observableArrayList();
-
-    @FXML
-    private Button addButtons;
-
-    @FXML
-    private Button addButtont;
+    private final ObservableList<TaskWithStudentDTO> taskData = FXCollections.observableArrayList();
 
     @FXML
     private TextField deadlineInput;
-
-    @FXML
-    private Button deleteButtons;
-
-    @FXML
-    private Button deleteButtont;
 
     @FXML
     private CheckBox descInput;
@@ -59,13 +49,7 @@ public class CuratorController {
     private TextField descriptionInput;
 
     @FXML
-    private Button filterButton;
-
-    @FXML
     private ComboBox<String> filtrInput;
-
-    @FXML
-    private Button genPDFButton;
 
     @FXML
     private TextField idInputs;
@@ -99,12 +83,6 @@ public class CuratorController {
 
     @FXML
     private TextField titleInput;
-
-    @FXML
-    private Button updateButtons;
-
-    @FXML
-    private Button updateButtont;
 
     @FXML
     private TableColumn<User, Long> idColumn;
@@ -243,8 +221,10 @@ public class CuratorController {
             return;
         }
 
+        String passwordHash = PasswordUtil.hashPassword(password);
+
         Long idCutator = ApplicationConfig.getCurrentUserId();
-        User user  = new User(-1L, mail, password, name, surname, Role.STUDENT, idCutator, null, null);
+        User user  = new User(-1L, mail, passwordHash, name, surname, Role.STUDENT, idCutator, null, null);
         userDAO.create(user);
 
         loadStudentsToTable();
@@ -281,7 +261,8 @@ public class CuratorController {
             user.setEmail(mail);
         }
         if (!password.isEmpty()) {
-            user.setPassword(password);
+            String passwordHash = PasswordUtil.hashPassword(password);
+            user.setPassword(passwordHash);
         }
         if (!name.isEmpty()) {
             user.setFirstName(name);
@@ -343,18 +324,18 @@ public class CuratorController {
             return;
         }
 
-        String customStr = "15.01.2024 14:30:00";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
         if (!checkDate(deadline, formatter)) {
             showAlert("Ошибка", "Дата не соответствует формату: dd.MM.yyyy HH:mm:ss", Alert.AlertType.WARNING);
             return;
         }
 
-        LocalDateTime deadlinedate = LocalDateTime.parse(customStr, formatter);
+        LocalDateTime deadlinedate = LocalDateTime.parse(deadline, formatter);
         LocalDateTime now = LocalDateTime.now();
 
         Task task = new Task(-1L, title, description, now, deadlinedate, null, null, StatusTask.TO_DO, user.getId(), idCurator);
         taskDAO.create(task);
+        TelegramNotificationService.getInstance().notifyNewTask(task);
 
         loadTasksToTable();
         clearInputFieldsTasks();
@@ -403,6 +384,14 @@ public class CuratorController {
 
         Task task = new Task(-1L, title, description, now, deadlinedate, null, null, StatusTask.valueOf(status), user.getId(), idCurator);
         taskDAO.update(task);
+        TelegramNotificationService.getInstance().sendNotificationToStudent(
+                task.getStudentId(),
+                "📝 *Задача обновлена*\n\n" +
+                        "Название: " + task.getTitle() + "\n" +
+                        "Новый дедлайн: " + formatDateTime(task.getDeadline()) + "\n" +
+                        "Статус: " + task.getStatus()
+        );
+
 
         loadTasksToTable();
         clearInputFieldsTasks();
@@ -505,7 +494,6 @@ public class CuratorController {
                     Alert.AlertType.INFORMATION);
 
         } catch (SQLException e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Ошибка фильтрации: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         }
@@ -521,7 +509,7 @@ public class CuratorController {
             dialog.setContentText("Тип:");
 
             Optional<String> result = dialog.showAndWait();
-            if (!result.isPresent())
+            if (result.isEmpty())
                 return;
 
             String reportType = result.get();
@@ -574,7 +562,6 @@ public class CuratorController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Ошибка генерации отчета: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         }
@@ -598,7 +585,6 @@ public class CuratorController {
             studentTable.setItems(studentData);
 
         } catch (SQLException e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Не удалось загрузить список студентов: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         } catch (Exception e) {
@@ -612,7 +598,6 @@ public class CuratorController {
             List<TaskWithStudentDTO> tasks = taskDAO.findAllTasksWithStudentByCuratorId(currentCuratorId);
             updateTaskTable(tasks);
         } catch (SQLException e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Не удалось загрузить список задач: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         } catch (Exception e) {

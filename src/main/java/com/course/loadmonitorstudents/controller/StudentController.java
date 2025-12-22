@@ -1,77 +1,67 @@
 package com.course.loadmonitorstudents.controller;
 
+import com.course.loadmonitorstudents.config.AppLifecycleService;
 import com.course.loadmonitorstudents.config.ApplicationConfig;
 import com.course.loadmonitorstudents.dao.RestDAO;
 import com.course.loadmonitorstudents.dao.TaskDAO;
+import com.course.loadmonitorstudents.dao.UserDAO;
 import com.course.loadmonitorstudents.dao.db.RestDAOPSql;
 import com.course.loadmonitorstudents.dao.db.TaskDAOPSql;
+import com.course.loadmonitorstudents.dao.db.UserDAOPSql;
 import com.course.loadmonitorstudents.dto.TaskWithCuratorDTO;
 import com.course.loadmonitorstudents.model.Rest;
 import com.course.loadmonitorstudents.model.StatusTask;
 import com.course.loadmonitorstudents.model.Task;
+import com.course.loadmonitorstudents.model.User;
+import com.course.loadmonitorstudents.service.GoogleCalendarService;
+import com.course.loadmonitorstudents.service.TelegramNotificationService;
+import com.course.loadmonitorstudents.util.PasswordUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.course.loadmonitorstudents.util.Checker.checkDate;
 import static com.course.loadmonitorstudents.util.Checker.isId;
 
 public class StudentController {
 
-    private TaskDAO taskDAO = new TaskDAOPSql();
-    private RestDAO restDAO = new RestDAOPSql();
+    private final UserDAO userDAO = new UserDAOPSql();
+    private final TaskDAO taskDAO = new TaskDAOPSql();
+    private final RestDAO restDAO = new RestDAOPSql();
 
-    private ObservableList<TaskWithCuratorDTO> taskData = FXCollections.observableArrayList();
-    private ObservableList<Rest> restData = FXCollections.observableArrayList();
+    private final ObservableList<TaskWithCuratorDTO> taskData = FXCollections.observableArrayList();
+    private final ObservableList<Rest> restData = FXCollections.observableArrayList();
 
-    @FXML
-    private Button addButtons;
-
-    @FXML
-    private Button addButtont;
+    private GoogleCalendarService googleCalendarService;
 
     @FXML
-    private Button addButtontr;
+    private TextField tgInput;
 
     @FXML
-    private Button calendarButtont;
+    private TextField passwordInput;
 
     @FXML
-    private Button calendarInputt;
+    private TextField googleInput;
 
     @FXML
     private TableColumn<TaskWithCuratorDTO, String> curatorSNColumn;
 
     @FXML
-    private TableColumn<Rest, String> dayColumn;
-
-    @FXML
-    private TextField dayInput;
+    private TableColumn<Rest, String> dataColumn;
 
     @FXML
     private TableColumn<TaskWithCuratorDTO, String> deadlineColumn;
-
-    @FXML
-    private Button deleteButtons;
-
-    @FXML
-    private Button deleteButtontr;
-
-    @FXML
-    private Button deleteButtontt;
-
-    @FXML
-    private CheckBox descInputr;
 
     @FXML
     private CheckBox descInputt;
@@ -86,28 +76,19 @@ public class StudentController {
     private TextField endInput;
 
     @FXML
-    private Button filterButtonr;
-
-    @FXML
-    private Button filterButtont;
-
-    @FXML
-    private AnchorPane filterCombo;
-
-    @FXML
-    private ComboBox<String> filtrInputr;
-
-    @FXML
     private ComboBox<String> filtrInputt;
 
     @FXML
-    private TableColumn<Rest, String> hourColumn;
+    private TableColumn<Rest, String> hoursColumn;
 
     @FXML
-    private TextField hourInput;
+    private TextField hoursInput;
 
     @FXML
-    private TableColumn<Rest, Long> idColumnr;
+    private TextField dataInput;
+
+    @FXML
+    private TableColumn<Rest, Long> idColumnRest;
 
     @FXML
     private TableColumn<TaskWithCuratorDTO, Long> idColumnt;
@@ -116,22 +97,10 @@ public class StudentController {
     private TableColumn<TaskWithCuratorDTO, Long> idCuratorColumn;
 
     @FXML
-    private TextField idInputr;
-
-    @FXML
     private TextField idInputt;
 
     @FXML
-    private TextField passwordInput;
-
-    @FXML
-    private TextField passwordInput1;
-
-    @FXML
-    private TextField passwordInput2;
-
-    @FXML
-    private TableView<Rest> resetTable;
+    private TableView<Rest> restTable;
 
     @FXML
     private TableColumn<TaskWithCuratorDTO, String> startColumn;
@@ -149,19 +118,182 @@ public class StudentController {
     private TableColumn<TaskWithCuratorDTO, String> titleColumn;
 
     @FXML
-    private Button updateButtons;
+    private TableView<User> settingsTable;
 
     @FXML
-    private Button updateButtont;
+    private TableColumn<User, String> telegramColumn;
 
     @FXML
-    private Button updateButtontr;
+    private TableColumn<User, String> googleColumn;
+
+    @FXML
+    private TableColumn<User, String> passwordColumn;
+
+    private final ObservableList<User> settingsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         setupTaskTableColumns();
+        setupRestTableColumns();
+        setupSettingsTableColumns();
         loadTasksToTable();
+        loadRestsToTable();
+        loadSettingsToTable();
         taskTable.setItems(taskData);
+        restTable.setItems(restData);
+        if (settingsTable != null) {
+            settingsTable.setItems(settingsData);
+        }
+        AppLifecycleService.initialize();
+        if (filtrInputt != null) {
+            filtrInputt.getSelectionModel().selectFirst();
+        }
+    }
+
+    private void setupSettingsTableColumns() {
+        telegramColumn.setCellValueFactory(cellData -> {
+            Long telegramId = cellData.getValue().getTelegramID();
+            return new SimpleStringProperty(telegramId != null ? telegramId.toString() : "Не привязан");
+        });
+
+        googleColumn.setCellValueFactory(cellData -> {
+            String googleKey = cellData.getValue().getGoogleCalendarApiKey();
+            return new SimpleStringProperty(googleKey != null && !googleKey.isEmpty() ? "Привязан" : "Не привязан");
+        });
+
+        passwordColumn.setCellValueFactory(cellData -> {
+            String password = cellData.getValue().getPassword();
+            return new SimpleStringProperty(password != null && !password.isEmpty() ? "********" : "Не установлен");
+        });
+    }
+
+    private void loadSettingsToTable() {
+        try {
+            User currentUser = ApplicationConfig.getCurrentUser();
+            if (currentUser != null) {
+                settingsData.clear();
+                settingsData.add(currentUser);
+                settingsTable.setItems(settingsData);
+                settingsTable.refresh();
+            }
+        } catch (Exception e) {
+            showAlert("Ошибка", "Не удалось загрузить настройки: " + e.getMessage(),
+                    Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void onCalendarInputtClick() {
+        try {
+            User currentUser = ApplicationConfig.getCurrentUser();
+            if (currentUser == null) {
+                showAlert("Ошибка", "Вы не авторизованы в системе", Alert.AlertType.ERROR);
+                return;
+            }
+
+            try {
+                java.net.URL resource = getClass().getResource("/com/course/loadmonitorstudents/google/secret.json");
+                if (resource == null) {
+                    showAlert("Ошибка конфигурации",
+                            "Файл secret.json не найден!\n\n" +
+                                    "Поместите файл в папку: src/main/resources/\n" +
+                                    "Получите его из Google Cloud Console",
+                            Alert.AlertType.ERROR);
+                    return;
+                }
+            } catch (Exception e) {
+                showAlert("Ошибка", "Не удалось проверить файл secret.json", Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (googleCalendarService == null) {
+                try {
+                    googleCalendarService = new GoogleCalendarService();
+                    System.out.println("Google Calendar Service создан");
+                } catch (Exception e) {
+                    String errorMsg = e.getMessage();
+                    String detailedMsg = "Ошибка создания Google Calendar Service:\n" + errorMsg;
+
+                    if (errorMsg.contains("com/course/loadmonitorstudents/google/secret.json") || errorMsg.contains("client_id")) {
+                        detailedMsg += "\n\nПроверьте файл secret.json в resources/";
+                    } else if (errorMsg.contains("8888")) {
+                        detailedMsg += "\n\nПорт 8888 занят. Измените порт в GoogleCalendarService.java";
+                    } else if (errorMsg.contains("401") || errorMsg.contains("403")) {
+                        detailedMsg += "\n\nУдалите папку 'tokens/' и попробуйте снова";
+                    }
+
+                    showAlert("Ошибка инициализации", detailedMsg, Alert.AlertType.ERROR);
+                    return;
+                }
+            }
+
+            Long studentId = ApplicationConfig.getCurrentUserId();
+            List<TaskWithCuratorDTO> tasks;
+            try {
+                tasks = taskDAO.findAllTasksByStudentId(studentId);
+            } catch (SQLException e) {
+                showAlert("Ошибка БД", "Не удалось получить задачи: " + e.getMessage(),
+                        Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (tasks.isEmpty()) {
+                showAlert("Информация", "У вас нет задач для добавления",
+                        Alert.AlertType.INFORMATION);
+                return;
+            }
+
+            Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmation.setTitle("Добавление в Google Calendar");
+            confirmation.setHeaderText("Добавить " + tasks.size() + " задач в календарь?");
+            confirmation.setContentText(
+                    "Первая синхронизация откроет браузер\n" +
+                            "для авторизации в Google.\n\n" +
+                            "Календарь: 'Курсовая'"
+            );
+
+            if (confirmation.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.CANCEL) {
+                return;
+            }
+
+            int added = 0;
+            int errors = 0;
+
+            for (TaskWithCuratorDTO taskDTO : tasks) {
+                try {
+                    Task task = taskDAO.getById(taskDTO.getId());
+                    if (task != null) {
+                        String eventId = googleCalendarService.createTaskEvent(task);
+                        added++;
+                        System.out.println("Добавлено: " + task.getTitle());
+                    }
+                } catch (Exception e) {
+                    errors++;
+                    System.err.println("Ошибка: " + taskDTO.getTitle() + " - " + e.getMessage());
+
+                    if (e.getMessage().contains("401") || e.getMessage().contains("403")) {
+                        showAlert("Ошибка авторизации",
+                                "Требуется повторная авторизация.\n" +
+                                        "Удалите папку 'tokens/' и попробуйте снова.",
+                                Alert.AlertType.ERROR);
+                        return;
+                    }
+                }
+            }
+
+            String resultMsg = " Добавлено задач: " + added + " из " + tasks.size();
+            if (errors > 0) {
+                resultMsg += "\n  Ошибок: " + errors;
+            }
+            resultMsg += "\n\nОткройте Google Calendar для просмотра";
+
+            showAlert("Синхронизация завершена", resultMsg, Alert.AlertType.INFORMATION);
+
+        } catch (Exception e) {
+            showAlert("Критическая ошибка",
+                    "Непредвиденная ошибка: " + e.getMessage(),
+                    Alert.AlertType.ERROR);
+        }
     }
 
     private void setupTaskTableColumns() {
@@ -194,19 +326,16 @@ public class StudentController {
     }
 
     private void setupRestTableColumns() {
-        idColumnr.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumnRest.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        dayColumn.setCellValueFactory(cellData -> {
+        dataColumn.setCellValueFactory(cellData -> {
             LocalDate date = cellData.getValue().getDate();
             return new SimpleStringProperty(formatDate(date));
         });
 
-        // Для часов используем свойство, которое будет рассчитываться на основе даты
-        hourColumn.setCellValueFactory(cellData -> {
-            // Здесь можно рассчитать количество часов отдыха
-            // Например, если день выходной - 24 часа, если рабочий - 0 часов
-            // Или можно хранить это значение в базе данных
-            return new SimpleStringProperty("24"); // По умолчанию
+        hoursColumn.setCellValueFactory(cellData -> {
+            Integer hours = cellData.getValue().getHours();
+            return new SimpleStringProperty(hours != null ? hours.toString() : "0");
         });
     }
 
@@ -218,8 +347,27 @@ public class StudentController {
             updateTaskTable(tasks);
 
         } catch (Exception e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Не удалось загрузить задачи: " + e.getMessage(),
+                    Alert.AlertType.ERROR);
+        }
+    }
+
+    private void updateRestTable(List<Rest> rests) {
+        restData.clear();
+        if (rests != null && !rests.isEmpty()) {
+            restData.addAll(rests);
+        }
+        restTable.setItems(restData);
+        restTable.refresh();
+    }
+
+    private void loadRestsToTable() {
+        try {
+            Long currentStudentId = ApplicationConfig.getCurrentUserId();
+            List<Rest> rests = restDAO.findByStudentId(currentStudentId);
+            updateRestTable(rests);
+        } catch (Exception e) {
+            showAlert("Ошибка", "Не удалось загрузить данные об отдыхе: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         }
     }
@@ -275,8 +423,8 @@ public class StudentController {
                     break;
 
                 case "Фамилия и имя":
-                    String curatorName = showInputDialog("Фильтр по куратору",
-                            "Введите фамилию или имя куратора:", "");
+                    String curatorName = showInputDialog(
+                    );
                     if (curatorName == null || curatorName.isEmpty()) {
                         return;
                     }
@@ -314,7 +462,6 @@ public class StudentController {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
             showAlert("Ошибка", "Ошибка фильтрации: " + e.getMessage(),
                     Alert.AlertType.ERROR);
         } catch (Exception e) {
@@ -341,13 +488,25 @@ public class StudentController {
         String idStr = idInputt.getText().trim();
         String start = startInput.getText().trim();
         String end = endInput.getText().trim();
+        LocalDateTime startdate = null;
+        LocalDateTime enddate = null;
 
-        if (idStr.isEmpty() || start.isEmpty() || end.isEmpty()) {
-            showAlert("Ошибка", "Заполните все поля", Alert.AlertType.ERROR);
+        if (idStr.isEmpty() && start.isEmpty() && end.isEmpty()) {
+            showAlert("Ошибка", "Заполните поля", Alert.AlertType.ERROR);
             return;
         }
 
-        Long idTask;
+        if (idStr.isEmpty()) {
+            showAlert("Ошибка", "Введите ID задачи", Alert.AlertType.ERROR);
+            return;
+        }
+
+        if (start.isEmpty() && end.isEmpty()) {
+            showAlert("Ошибка", "Заполните дату начала или окончания", Alert.AlertType.ERROR);
+            return;
+        }
+
+        long idTask;
         try {
             idTask = Long.parseLong(idStr);
         } catch (NumberFormatException e) {
@@ -364,19 +523,21 @@ public class StudentController {
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        LocalDateTime startTime;
-        LocalDateTime endTime;
-
-        try {
-            startTime = LocalDateTime.parse(start, formatter);
-            endTime = LocalDateTime.parse(end, formatter);
-        } catch (Exception e) {
-            showAlert("Ошибка", "Неверный формат даты. Используйте: дд.ММ.гггг чч:мм:сс",
-                    Alert.AlertType.ERROR);
+        if (!start.isEmpty() && !checkDate(start, formatter)) {
+            showAlert("Ошибка", "Дата старта не соответствует формату: dd.MM.yyyy HH:mm:ss", Alert.AlertType.WARNING);
+            return;
+        }
+        if (!end.isEmpty() && !checkDate(end, formatter)) {
+            showAlert("Ошибка", "Дата сдачи не соответствует формату: dd.MM.yyyy HH:mm:ss", Alert.AlertType.WARNING);
             return;
         }
 
-        if (endTime.isBefore(startTime)) {
+        if (!start.isEmpty())
+            startdate = LocalDateTime.parse(start, formatter);
+        if (!end.isEmpty())
+            enddate = LocalDateTime.parse(end, formatter);
+
+        if (!end.isEmpty() && !start.isEmpty() && enddate.isBefore(startdate)) {
             showAlert("Ошибка", "Время окончания не может быть раньше времени начала",
                     Alert.AlertType.ERROR);
             return;
@@ -384,17 +545,20 @@ public class StudentController {
 
         LocalDateTime deadline = task.getDeadline();
 
-        task.setStartWork(startTime);
-        task.setStatus(StatusTask.IN_PROGRESS);
+        if (startdate != null) {
+            task.setStartWork(startdate);
+            task.setStatus(StatusTask.IN_PROGRESS);
 
-        if (deadline != null && deadline.isBefore(startTime)) {
+
+        if (deadline != null && deadline.isBefore(startdate)) {
             task.setStatus(StatusTask.OVERDUE);
         }
+        }
 
-        task.setEndWork(endTime);
+        if (enddate != null) {
+            task.setEndWork(enddate);
 
-        if (endTime != null) {
-            if (deadline != null && deadline.isBefore(endTime)) {
+            if (deadline != null && deadline.isBefore(enddate)) {
                 task.setStatus(StatusTask.OVERDUE);
             } else {
                 task.setStatus(StatusTask.DONE);
@@ -408,6 +572,133 @@ public class StudentController {
         clearInputFields();
 
         showAlert("Успех", "Время работы над задачей обновлено", Alert.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void onAddButtontgpClick() throws Exception {
+        String telegram = tgInput.getText().trim();
+        String google = googleInput.getText().trim();
+
+        if (telegram.isEmpty() && google.isEmpty()) {
+            showAlert("Ошибка", "Заполните Telegram или Google Calendar",
+                    Alert.AlertType.ERROR);
+            return;
+        }
+
+        User user = ApplicationConfig.getCurrentUser();
+
+        if (!telegram.isEmpty()) {
+            long telegramIdnum;
+            try {
+                telegramIdnum = Long.parseLong(telegram.trim());
+            } catch (NumberFormatException e) {
+                showAlert("Ошибка", "ID Telegram должен быть целым числом",
+                        Alert.AlertType.ERROR);
+                return;
+            }
+            user.setTelegramID(telegramIdnum);
+        }
+        if (!google.isEmpty()) {
+            user.setGoogleCalendarApiKey(google);
+        }
+
+        userDAO.update(user);
+
+        tgInput.clear();
+        googleInput.clear();
+        loadSettingsToTable();
+
+        showAlert("Успех", "Настройки обновлены", Alert.AlertType.INFORMATION);
+    }
+
+    @FXML
+    private void onUpdateButtontgpClick() throws Exception {
+        String telegram = tgInput.getText().trim();
+        String google = googleInput.getText().trim();
+        String password = passwordInput.getText().trim();
+
+        if (telegram.isEmpty() && google.isEmpty() && password.isEmpty()) {
+            showAlert("Ошибка", "Ни одно поле не заполнено",
+                    Alert.AlertType.ERROR);
+            return;
+        }
+
+        User user = ApplicationConfig.getCurrentUser();
+
+        if (!telegram.isEmpty()) {
+            long telegramIdnum;
+            try {
+                telegramIdnum = Long.parseLong(telegram.trim());
+            } catch (NumberFormatException e) {
+                showAlert("Ошибка", "ID Telegram должен быть целым числом",
+                        Alert.AlertType.ERROR);
+                return;
+            }
+            user.setTelegramID(telegramIdnum);
+        }
+        if (!google.isEmpty()) {
+            user.setGoogleCalendarApiKey(google);
+        }
+        if (!password.isEmpty()) {
+            if (password.length() < 6) {
+                showAlert("Ошибка", "Пароль должен содержать минимум 6 символов",
+                        Alert.AlertType.ERROR);
+                return;
+            }
+            String hashPassword = PasswordUtil.hashPassword(password);
+            user.setPassword(hashPassword);
+        }
+
+        userDAO.update(user);
+
+        tgInput.clear();
+        googleInput.clear();
+        passwordInput.clear();
+        loadSettingsToTable();
+
+        showAlert("Успех", "Настройки обновлены", Alert.AlertType.INFORMATION);
+
+    }
+
+    @FXML
+    private void onAddButtonRestClick() throws Exception {
+        String data = dataInput.getText().trim();
+        String hours = hoursInput.getText().trim();
+
+        if (data.isEmpty() && hours.isEmpty()) {
+            showAlert("Ошибка", "поля не заполнены",
+                    Alert.AlertType.ERROR);
+            return;
+        }
+
+        LocalDate lData;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+        try {
+            lData = LocalDate.parse(data, formatter);
+        } catch (DateTimeParseException e) {
+            showAlert("Ошибка", "Неверный формат даты. Используйте: дд.ММ.гггг",
+                    Alert.AlertType.ERROR);
+            return;
+        }
+
+        int iHours;
+        try {
+            iHours = Integer.parseInt(hours.trim());
+        } catch (NumberFormatException e) {
+            showAlert("Ошибка", "Введите положительное целое число для количества часов сна",
+                    Alert.AlertType.ERROR);
+            return;
+        }
+
+        Rest rest = new Rest(-1L, lData, iHours, ApplicationConfig.getCurrentUserId());
+
+        restDAO.create(rest);
+        TelegramNotificationService.getInstance().notifySleepRecommendation(
+                ApplicationConfig.getCurrentUserId(),
+                iHours
+        );
+        showAlert("Успех", "", Alert.AlertType.INFORMATION);
     }
 
     private void clearInputFields() {
@@ -426,10 +717,10 @@ public class StudentController {
         return result.orElse(null);
     }
 
-    private String showInputDialog(String title, String header, String defaultValue) {
-        TextInputDialog dialog = new TextInputDialog(defaultValue);
-        dialog.setTitle(title);
-        dialog.setHeaderText(header);
+    private String showInputDialog() {
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Фильтр по куратору");
+        dialog.setHeaderText("Введите фамилию или имя куратора:");
         dialog.setContentText("Значение:");
 
         Optional<String> result = dialog.showAndWait();

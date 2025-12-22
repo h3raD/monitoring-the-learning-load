@@ -1,4 +1,4 @@
-package com.course.loadmonitorstudents.util;
+package com.course.loadmonitorstudents.service;
 
 import com.course.loadmonitorstudents.dto.TaskWithStudentDTO;
 import com.course.loadmonitorstudents.model.User;
@@ -6,9 +6,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -17,12 +19,49 @@ public class PdfReportGenerator {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
+    private static PDFont loadCyrillicFont(PDDocument document) throws IOException {
+        try {
+            InputStream fontStream = null;
+
+            fontStream = PdfReportGenerator.class
+                    .getResourceAsStream("/com/course/loadmonitorstudents/fonts/arialmt.ttf");
+
+            if (fontStream == null) {
+                fontStream = PdfReportGenerator.class
+                        .getClassLoader()
+                        .getResourceAsStream("com/course/loadmonitorstudents/fonts/arialmt.ttf");
+            }
+
+            if (fontStream == null) {
+                fontStream = Thread.currentThread()
+                        .getContextClassLoader()
+                        .getResourceAsStream("fonts/arialmt.ttf");
+            }
+
+            if (fontStream != null) {
+                PDType0Font font = PDType0Font.load(document, fontStream);
+                System.out.println("Шрифт arialmt.ttf успешно загружен");
+                return font;
+            } else {
+                throw new IOException("Шрифт arialmt.ttf не найден в ресурсах");
+            }
+
+        } catch (Exception e) {
+            System.err.println("КРИТИЧЕСКАЯ ОШИБКА: Не удалось загрузить кириллический шрифт!");
+            System.err.println("Ошибка: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Не удалось загрузить кириллический шрифт. Убедитесь, что файл arialmt.ttf находится в resources/fonts/", e);
+        }
+    }
+
     public static void generateTaskReport(List<TaskWithStudentDTO> tasks,
                                           String filterType,
                                           boolean descending,
                                           String filePath) throws IOException {
 
         try (PDDocument document = new PDDocument()) {
+            PDFont font = loadCyrillicFont(document);
+
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
 
@@ -35,7 +74,7 @@ public class PdfReportGenerator {
                 float yPosition = yStart;
                 float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
 
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+                contentStream.setFont(font, 16);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 contentStream.showText("Отчет по задачам");
@@ -43,7 +82,7 @@ public class PdfReportGenerator {
 
                 yPosition -= 30;
 
-                contentStream.setFont(PDType1Font.HELVETICA, 10);
+                contentStream.setFont(font, 10);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 String filterInfo = "Фильтр: " +
@@ -66,21 +105,21 @@ public class PdfReportGenerator {
                         "Студент", "ID студента"};
                 float[] columnWidths = {30, 80, 100, 60, 80, 100, 50};
 
-                drawTableHeader(contentStream, margin, yPosition, tableWidth, headers, columnWidths);
+                drawTableHeader(contentStream, font, margin, yPosition, tableWidth, headers, columnWidths);
                 yPosition -= 20;
 
-                contentStream.setFont(PDType1Font.HELVETICA, 8);
+                contentStream.setFont(font, 8);
                 for (TaskWithStudentDTO task : tasks) {
                     if (yPosition < 100) {
-                        // Закрываем текущий contentStream
+                        try {
+                            contentStream.endText();
+                        } catch (Exception ignored) {}
                         contentStream.close();
-                        // Создаем новую страницу
                         page = new PDPage(PDRectangle.A4);
                         document.addPage(page);
-                        // Создаем новый contentStream для новой страницы
                         contentStream = new PDPageContentStream(document, page);
                         yPosition = yStart - 50;
-                        contentStream.setFont(PDType1Font.HELVETICA, 8);
+                        contentStream.setFont(font, 8);
                     }
 
                     String[] rowData = {
@@ -94,12 +133,12 @@ public class PdfReportGenerator {
                             String.valueOf(task.getStudentId())
                     };
 
-                    drawTableRow(contentStream, margin, yPosition, tableWidth, rowData, columnWidths);
+                    drawTableRow(contentStream, font, margin, yPosition, tableWidth, rowData, columnWidths);
                     yPosition -= 15;
                 }
 
                 yPosition -= 20;
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+                contentStream.setFont(font, 10);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 contentStream.showText("Всего задач: " + tasks.size());
@@ -107,6 +146,9 @@ public class PdfReportGenerator {
 
             } finally {
                 if (contentStream != null) {
+                    try {
+                        contentStream.endText();
+                    } catch (Exception ignored) {}
                     contentStream.close();
                 }
             }
@@ -117,6 +159,8 @@ public class PdfReportGenerator {
 
     public static void generateUserReport(List<User> users, String filePath) throws IOException {
         try (PDDocument document = new PDDocument()) {
+            PDFont font = loadCyrillicFont(document);
+
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
 
@@ -129,7 +173,7 @@ public class PdfReportGenerator {
                 float yPosition = yStart;
                 float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
 
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+                contentStream.setFont(font, 16);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 contentStream.showText("Отчет по пользователям (без паролей)");
@@ -137,7 +181,7 @@ public class PdfReportGenerator {
 
                 yPosition -= 30;
 
-                contentStream.setFont(PDType1Font.HELVETICA, 10);
+                contentStream.setFont(font, 10);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 contentStream.showText("Дата генерации: " +
@@ -149,19 +193,22 @@ public class PdfReportGenerator {
                 String[] headers = {"ID", "Email", "Имя", "Фамилия", "Роль", "Куратор ID"};
                 float[] columnWidths = {30, 120, 80, 80, 60, 60};
 
-                drawTableHeader(contentStream, margin, yPosition, tableWidth, headers, columnWidths);
+                drawTableHeader(contentStream, font, margin, yPosition, tableWidth, headers, columnWidths);
                 yPosition -= 20;
 
-                contentStream.setFont(PDType1Font.HELVETICA, 8);
+                contentStream.setFont(font, 8);
                 for (User user : users) {
                     if (yPosition < 100) {
-                        // Закрываем текущий и создаем новый для новой страницы
+                        try {
+                            contentStream.endText();
+                        } catch (Exception ignored) {
+                        }
                         contentStream.close();
                         page = new PDPage(PDRectangle.A4);
                         document.addPage(page);
                         contentStream = new PDPageContentStream(document, page);
                         yPosition = yStart - 50;
-                        contentStream.setFont(PDType1Font.HELVETICA, 8);
+                        contentStream.setFont(font, 8);
                     }
 
                     String[] rowData = {
@@ -173,12 +220,12 @@ public class PdfReportGenerator {
                             user.getCuratorId() != null ? String.valueOf(user.getCuratorId()) : ""
                     };
 
-                    drawTableRow(contentStream, margin, yPosition, tableWidth, rowData, columnWidths);
+                    drawTableRow(contentStream, font, margin, yPosition, tableWidth, rowData, columnWidths);
                     yPosition -= 15;
                 }
 
                 yPosition -= 20;
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+                contentStream.setFont(font, 10);
                 contentStream.beginText();
                 contentStream.newLineAtOffset(margin, yPosition);
                 contentStream.showText("Всего пользователей: " + users.size());
@@ -186,6 +233,10 @@ public class PdfReportGenerator {
 
             } finally {
                 if (contentStream != null) {
+                    try {
+                        contentStream.endText();
+                    } catch (Exception ignored) {
+                    }
                     contentStream.close();
                 }
             }
@@ -194,10 +245,10 @@ public class PdfReportGenerator {
         }
     }
 
-    private static void drawTableHeader(PDPageContentStream contentStream, float x, float y,
-                                        float width, String[] headers, float[] columnWidths)
-            throws IOException {
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 10);
+    private static void drawTableHeader(PDPageContentStream contentStream, PDFont font,
+                                        float x, float y, float width,
+                                        String[] headers, float[] columnWidths) throws IOException {
+        contentStream.setFont(font, 10);
         float currentX = x;
 
         for (int i = 0; i < headers.length; i++) {
@@ -214,9 +265,9 @@ public class PdfReportGenerator {
         }
     }
 
-    private static void drawTableRow(PDPageContentStream contentStream, float x, float y,
-                                     float width, String[] rowData, float[] columnWidths)
-            throws IOException {
+    private static void drawTableRow(PDPageContentStream contentStream, PDFont font,
+                                     float x, float y, float width,
+                                     String[] rowData, float[] columnWidths) throws IOException {
         float currentX = x;
 
         for (int i = 0; i < rowData.length; i++) {

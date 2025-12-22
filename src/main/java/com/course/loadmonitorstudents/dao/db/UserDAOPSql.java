@@ -23,16 +23,16 @@ public class UserDAOPSql implements UserDAO {
         u.setLastName(rs.getString("lastName"));
         u.setRole(Role.valueOf(rs.getString("role")));
         u.setCuratorId((Long)rs.getObject("curator_id"));
-        u.setTelegramApiKey(rs.getString("telegram_api_key"));
+        u.setTelegramID((Long)rs.getObject("telegram_id"));
         u.setGoogleCalendarApiKey(rs.getString("google_calendar_api_key"));
         return u;
     }
 
     public void create(User user) throws SQLException {
         String sql = """
-            INSERT INTO users(email, password, firstName, lastName, role, curator_id, telegram_api_key, google_calendar_api_key)
-            VALUES (?, ?, ?, ?, ?::role_type, ?, ?, ?)
-        """;
+        INSERT INTO users(email, password, firstName, lastName, role, curator_id, telegram_id, google_calendar_api_key)
+        VALUES (?, ?, ?, ?, ?::role_type, ?, ?, ?)
+    """;
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -43,7 +43,9 @@ public class UserDAOPSql implements UserDAO {
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getRole().name());
             stmt.setObject(6, user.getCuratorId());
-            stmt.setString(7, user.getTelegramApiKey());
+
+            stmt.setObject(7, user.getTelegramID());
+
             stmt.setString(8, user.getGoogleCalendarApiKey());
 
             stmt.executeUpdate();
@@ -52,10 +54,10 @@ public class UserDAOPSql implements UserDAO {
 
     public void update(User user) throws SQLException {
         String sql = """
-            UPDATE users SET email=?, password=?, firstName=?, lastName=?, role=?::role_type,
-                             curator_id=?, telegram_api_key=?, google_calendar_api_key=?
-            WHERE id=?
-        """;
+        UPDATE users SET email=?, password=?, firstName=?, lastName=?, role=?::role_type,
+                         curator_id=?, telegram_id=?, google_calendar_api_key=?
+        WHERE id=?
+    """;
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -66,7 +68,9 @@ public class UserDAOPSql implements UserDAO {
             stmt.setString(4, user.getLastName());
             stmt.setString(5, user.getRole().name());
             stmt.setObject(6, user.getCuratorId());
-            stmt.setString(7, user.getTelegramApiKey());
+
+            stmt.setObject(7, user.getTelegramID());
+
             stmt.setString(8, user.getGoogleCalendarApiKey());
             stmt.setLong(9, user.getId());
 
@@ -92,6 +96,19 @@ public class UserDAOPSql implements UserDAO {
 
             stmt.setString(1, mail);
             stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) return map(rs);
+            return null;
+        }
+    }
+
+    public User findByEmail(String mail) throws SQLException{
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, mail);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) return map(rs);

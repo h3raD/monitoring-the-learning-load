@@ -4,6 +4,7 @@ import com.course.loadmonitorstudents.model.User;
 
 public class ApplicationConfig {
     private static User currentUser;
+    public final static String googleindent = "d28d5e5db4dac173ffff8bfc20d94ad7d6b29e11846719fd41e12fac783ada46@group.calendar.google.com";
 
     private ApplicationConfig() {
 

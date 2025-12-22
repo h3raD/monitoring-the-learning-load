@@ -8,13 +8,13 @@ public class User {
     private String lastName;
     private Role role;
     private Long curatorId;
-    private String telegramApiKey;
+    private Long telegramID;
     private String googleCalendarApiKey;
 
     public User() {}
 
     public User(Long id, String email, String password, String firstName, String lastName,
-                Role role, Long curatorId, String telegramApiKey, String googleCalendarApiKey) {
+                Role role, Long curatorId, Long telegramID, String googleCalendarApiKey) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -22,7 +22,7 @@ public class User {
         this.lastName = lastName;
         this.role = role;
         this.curatorId = curatorId;
-        this.telegramApiKey = telegramApiKey;
+        this.telegramID = telegramID;
         this.googleCalendarApiKey = googleCalendarApiKey;
     }
 
@@ -82,12 +82,12 @@ public class User {
         this.curatorId = curatorId;
     }
 
-    public String getTelegramApiKey() {
-        return telegramApiKey;
+    public Long getTelegramID() {
+        return telegramID;
     }
 
-    public void setTelegramApiKey(String telegramApiKey) {
-        this.telegramApiKey = telegramApiKey;
+    public void setTelegramID(Long telegramID) {
+        this.telegramID = telegramID;
     }
 
     public String getGoogleCalendarApiKey() {

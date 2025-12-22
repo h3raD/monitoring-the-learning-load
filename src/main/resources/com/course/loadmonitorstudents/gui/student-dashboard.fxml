@@ -13,17 +13,16 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="311.0">
                             <children>
-                                <Button fx:id="addButtons" layoutX="395.0" layoutY="227.0" mnemonicParsing="false" text="Добавить" />
-                                <Button fx:id="updateButtons" layoutX="683.0" layoutY="227.0" mnemonicParsing="false" text="Изменить" />
-                                <Button fx:id="deleteButtons" layoutX="537.0" layoutY="227.0" mnemonicParsing="false" text="Отвязать" />
-                                <TextField fx:id="passwordInput" layoutX="165.0" layoutY="154.0" text="telegram" />
-                        <TextField fx:id="passwordInput1" layoutX="873.0" layoutY="154.0" text="пароль" />
-                        <TextField fx:id="passwordInput2" layoutX="502.0" layoutY="154.0" text="google calendar" />
-                        <TableView layoutX="61.0" layoutY="73.0" prefHeight="64.0" prefWidth="1048.0">
+                                <Button fx:id="addButtontgp" layoutX="395.0" layoutY="227.0" mnemonicParsing="false" text="Привязать" onAction="#onAddButtontgpClick"/>
+                                <Button fx:id="updateButtontgp" layoutX="684.0" layoutY="227.0" mnemonicParsing="false" text="Изменить" onAction="#onUpdateButtontgpClick"/>
+                                <TextField fx:id="tgInput" layoutX="165.0" layoutY="154.0" promptText="telegram" />
+                        <TextField fx:id="passwordInput" layoutX="873.0" layoutY="154.0" promptText="пароль" />
+                        <TextField fx:id="googleInput" layoutX="502.0" layoutY="154.0" promptText="google calendar" />
+                        <TableView fx:id="settingsTable" layoutX="61.0" layoutY="73.0" prefHeight="64.0" prefWidth="1048.0">
                           <columns>
-                            <TableColumn prefWidth="364.0" text="telegram" />
-                            <TableColumn prefWidth="319.0" text="google calendar" />
-                              <TableColumn minWidth="0.0" prefWidth="360.0" text="пароль" />
+                            <TableColumn fx:id="telegramColumn" prefWidth="364.0" text="telegram" />
+                            <TableColumn fx:id="googleColumn" prefWidth="319.0" text="google calendar" />
+                              <TableColumn fx:id="passwordColumn" minWidth="0.0" prefWidth="360.0" text="пароль" />
                           </columns>
                         </TableView>
                             </children></AnchorPane>
@@ -47,8 +46,8 @@
                                     </columns>
                                 </TableView>
                                 <Button fx:id="addButtont" layoutX="90.0" layoutY="221.0" mnemonicParsing="false" onAction="#onAddButtontClick" text="Начать/Закончить" />
-                                <TextField fx:id="idInputt" layoutX="73.0" layoutY="71.0" text="ID" />
-                                <TextField fx:id="startInput" layoutX="74.0" layoutY="119.0" text="старт" />
+                                <TextField fx:id="idInputt" layoutX="73.0" layoutY="71.0" promptText="ID" />
+                                <TextField fx:id="startInput" layoutX="74.0" layoutY="119.0" promptText="старт" />
                                 <ComboBox fx:id="filtrInputt" layoutX="33.0" layoutY="292.0" prefWidth="150.0">
                                     <items>
                                         <FXCollections fx:factory="observableArrayList">
@@ -60,13 +59,31 @@
                                     </items>
                                 </ComboBox>
                                 <CheckBox fx:id="descInputt" layoutX="204.0" layoutY="296.0" mnemonicParsing="false" text="по убыванию" />
-                                <Button fx:id="filterButtont" layoutX="33.0" layoutY="337.0" mnemonicParsing="false" text="отфильровать" />
-                        <TextField fx:id="endInput" layoutX="73.0" layoutY="160.0" text="сдача" />
-                        <Button fx:id="calendarInputt" layoutX="92.0" layoutY="455.0" mnemonicParsing="false" text="подтянуть в google calendar" />
+                                <Button fx:id="filterButtont" onAction="#onFilterButtontClick" layoutX="33.0" layoutY="337.0" mnemonicParsing="false" text="отфильровать" />
+                        <TextField fx:id="endInput" layoutX="73.0" layoutY="160.0" promptText="сдача" />
+                        <Button fx:id="calendarInputt" onAction="#onCalendarInputtClick" layoutX="92.0" layoutY="455.0" mnemonicParsing="false" text="подтянуть в google calendar" />
                             </children>
                         </AnchorPane>
                     </content>
                 </Tab>
+            <Tab text="отдых">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView fx:id="restTable" layoutX="321.0" layoutY="25.0" prefHeight="477.0" prefWidth="813.0">
+                           <columns>
+                              <TableColumn fx:id="idColumnRest" prefWidth="257.0" text="ID" />
+                              <TableColumn fx:id="dataColumn" prefWidth="245.0" text="дата" />
+                              <TableColumn fx:id="hoursColumn" prefWidth="310.0" text="часы" />
+                           </columns>
+                        </TableView>
+                        <Button fx:id="addButtonRest" layoutX="114.0" layoutY="232.0" mnemonicParsing="false" onAction="#onAddButtonRestClick" text="Добавить" />
+                        <TextField fx:id="dataInput" layoutX="84.0" layoutY="120.0" promptText="дата" />
+                        <TextField fx:id="hoursInput" layoutX="84.0" layoutY="161.0" promptText="количество часов сна" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
             </tabs>
         </TabPane>
     </children>

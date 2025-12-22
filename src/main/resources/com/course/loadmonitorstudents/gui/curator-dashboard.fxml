@@ -1,63 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
-<AnchorPane prefHeight="558.0" prefWidth="1002.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.course.loadmonitorstudents.controller.CuratorController">
+<AnchorPane prefHeight="558.0" prefWidth="1002.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.course.loadmonitorstudents.controller.CuratorController">
    <children>
       <TabPane layoutX="-1.0" layoutY="-2.0" prefHeight="558.0" prefWidth="1002.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
-          <Tab text="Студенты">
+          <Tab text="студенты">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="311.0">
                      <children>
                          <TableView fx:id="studentTable" layoutX="322.0" layoutY="18.0" prefHeight="489.0" prefWidth="668.0">
                              <columns>
-                                 <TableColumn prefWidth="47.0" text="ID">
+                                 <TableColumn fx:id="idColumn" prefWidth="47.0" text="ID">
                                      <cellValueFactory>
                                          <PropertyValueFactory property="id" />
                                      </cellValueFactory>
                                  </TableColumn>
-                                 <TableColumn prefWidth="116.0" text="имя">
+                                 <TableColumn fx:id="nameColumn" prefWidth="116.0" text="имя">
                                      <cellValueFactory>
                                          <PropertyValueFactory property="firstName" />
                                      </cellValueFactory>
                                  </TableColumn>
-                                 <TableColumn prefWidth="127.0" text="фамилия">
+                                 <TableColumn fx:id="surnameColumn" prefWidth="127.0" text="фамилия">
                                      <cellValueFactory>
                                          <PropertyValueFactory property="lastName" />
                                      </cellValueFactory>
                                  </TableColumn>
-                                 <TableColumn prefWidth="135.0" text="почта">
+                                 <TableColumn fx:id="mailColumn" prefWidth="135.0" text="почта">
                                      <cellValueFactory>
                                          <PropertyValueFactory property="email" />
                                      </cellValueFactory>
                                  </TableColumn>
-                                 <TableColumn minWidth="8.0" prefWidth="116.0" text="пароль">
+                                 <TableColumn fx:id="passwordColumn" minWidth="8.0" prefWidth="116.0" text="пароль">
                                      <cellValueFactory>
                                          <PropertyValueFactory property="password" />
                                      </cellValueFactory>
                                  </TableColumn>
                              </columns>
                          </TableView>
-                        <Button fx:id="addButtons" layoutX="51.0" layoutY="287.0" mnemonicParsing="false" text="Добавить" onAction="#onAddButtonsClick" />
-                        <Button fx:id="updateButtons" layoutX="125.0" layoutY="287.0" mnemonicParsing="false" text="Изменить" onAction="#onUpdateButtonsClick" />
-                        <Button fx:id="deleteButtons" layoutX="204.0" layoutY="287.0" mnemonicParsing="false" text="Удалить" onAction="#onDeleteButtonsClick" />
-                        <TextField fx:id="mailInput" layoutX="85.0" layoutY="90.0" text="почта" />
-                        <TextField fx:id="passwordInput" layoutX="85.0" layoutY="125.0" text="пароль" />
-                        <TextField fx:id="nameInput" layoutX="85.0" layoutY="160.0" text="имя" />
-                        <TextField fx:id="surnameInput" layoutX="85.0" layoutY="195.0" text="фамилия" />
-                        <TextField fx:id="idInputs" layoutX="85.0" layoutY="55.0" text="id" />
+                        <Button fx:id="addButtons" layoutX="51.0" layoutY="287.0" mnemonicParsing="false" onAction="#onAddButtonsClick" text="Добавить" />
+                        <Button fx:id="updateButtons" layoutX="125.0" layoutY="287.0" mnemonicParsing="false" onAction="#onUpdateButtonsClick" text="Изменить" />
+                        <Button fx:id="deleteButtons" layoutX="204.0" layoutY="287.0" mnemonicParsing="false" onAction="#onDeleteButtonsClick" text="Удалить" />
+                        <TextField fx:id="mailInput" layoutX="85.0" layoutY="90.0" promptText="почта" />
+                        <TextField fx:id="passwordInput" layoutX="85.0" layoutY="125.0" promptText="пароль" />
+                        <TextField fx:id="nameInput" layoutX="85.0" layoutY="160.0" promptText="имя" />
+                        <TextField fx:id="surnameInput" layoutX="85.0" layoutY="195.0" promptText="фамилия" />
+                        <TextField fx:id="idInputs" layoutX="85.0" layoutY="55.0" promptText="id" />
                      </children>
               </AnchorPane>
             </content>
@@ -68,49 +61,39 @@
                      <children>
                         <TableView fx:id="taskTable" layoutX="321.0" layoutY="16.0" prefHeight="486.0" prefWidth="673.0">
                           <columns>
-                              <TableColumn prefWidth="38.0" text="ID" />
-                              <TableColumn prefWidth="76.0" text="название" />
-                              <TableColumn prefWidth="73.0" text="описание" />
-                              <TableColumn prefWidth="60.0" text="статус" />
-                              <TableColumn prefWidth="76.0" text="дедлайн" />
-                              <TableColumn minWidth="0.0" prefWidth="61.0" text="старт" />
-                              <TableColumn minWidth="0.0" prefWidth="61.0" text="сдача" />
-                              <TableColumn minWidth="0.0" prefWidth="126.0" text="фамилия студента" />
-                              <TableColumn prefWidth="88.0" text="имя студента" />
-                              <TableColumn prefWidth="74.0" text="ID студента" />
+                              <TableColumn fx:id="taskIdColumn" prefWidth="38.0" text="ID" />
+                              <TableColumn fx:id="taskTitleColumn" prefWidth="76.0" text="название" />
+                              <TableColumn fx:id="taskDescriptionColumn" prefWidth="73.0" text="описание" />
+                              <TableColumn fx:id="taskStatusColumn" prefWidth="60.0" text="статус" />
+                              <TableColumn fx:id="taskDeadlineColumn" prefWidth="76.0" text="дедлайн" />
+                              <TableColumn fx:id="taskStartColumn" minWidth="0.0" prefWidth="61.0" text="старт" />
+                              <TableColumn fx:id="taskEndColumn" minWidth="0.0" prefWidth="61.0" text="сдача" />
+                              <TableColumn fx:id="taskStudentLastNameColumn" minWidth="0.0" prefWidth="126.0" text="фамилия студента" />
+                              <TableColumn fx:id="taskStudentFirstNameColumn" prefWidth="88.0" text="имя студента" />
+                              <TableColumn fx:id="taskStudentIdColumn" prefWidth="74.0" text="ID студента" />
                           </columns>
                         </TableView>
-                        <Button fx:id="addButtont" layoutX="30.0" layoutY="323.0" mnemonicParsing="false" text="Добавить" onAction="#onAddButtontClick"/>
-                        <Button fx:id="updateButtont" layoutX="113.0" layoutY="323.0" mnemonicParsing="false" text="Изменить" onAction="#onUpdateButtontClick"/>
-                        <Button fx:id="deleteButtont" layoutX="203.0" layoutY="323.0" mnemonicParsing="false" text="Удалить" onAction="#onDeleteButtontClick"/>
-                        <TextField fx:id="idInputt" layoutX="73.0" layoutY="71.0" text="ID" />
-                        <TextField fx:id="titleInput" layoutX="73.0" layoutY="107.0" text="название" />
-                        <TextField fx:id="descriptionInput" layoutX="73.0" layoutY="143.0" text="описание" />
-                        <TextField fx:id="deadlineInput" layoutX="73.0" layoutY="215.0" text="дедлайн" />
-                        <TextField fx:id="studentIdInput" layoutX="73.0" layoutY="250.0" text="ID студента" />
-                        <ComboBox fx:id="statusInput" layoutX="73.0" layoutY="190.0" prefWidth="150.0" promptText="статус">
-                             <items>
-                                 <FXCollections fx:factory="observableArrayList">
-                                     <String fx:value="TO_DO"/>
-                                     <String fx:value="IN_PROGRESS"/>
-                                     <String fx:value="DONE"/>
-                                     <String fx:value="OVERDUE"/>
-                                 </FXCollections>
-                             </items>
-                         </ComboBox>
-                        <ComboBox fx:id="filtrInput" layoutX="30.0" layoutY="407.0" prefWidth="150.0" >
+                        <Button fx:id="addButtont" layoutX="30.0" layoutY="323.0" mnemonicParsing="false" onAction="#onAddButtontClick" text="Добавить" />
+                        <Button fx:id="updateButtont" layoutX="113.0" layoutY="323.0" mnemonicParsing="false" onAction="#onUpdateButtontClick" text="Изменить" />
+                        <Button fx:id="deleteButtont" layoutX="203.0" layoutY="323.0" mnemonicParsing="false" onAction="#onDeleteButtontClick" text="Удалить" />
+                        <TextField fx:id="idInputt" layoutX="73.0" layoutY="71.0" promptText="ID" />
+                        <TextField fx:id="titleInput" layoutX="73.0" layoutY="107.0" promptText="название" />
+                        <TextField fx:id="descriptionInput" layoutX="73.0" layoutY="143.0" promptText="описание" />
+                        <TextField fx:id="deadlineInput" layoutX="73.0" layoutY="215.0" promptText="дедлайн" />
+                        <TextField fx:id="studentIdInput" layoutX="73.0" layoutY="250.0" promptText="ID студента" />
+                        <ComboBox fx:id="statusInput" layoutX="73.0" layoutY="190.0" prefWidth="150.0" promptText="статус" />
+                        <ComboBox fx:id="filtrInput" layoutX="30.0" layoutY="407.0" prefWidth="150.0">
                             <items>
                                 <FXCollections fx:factory="observableArrayList">
-                                     <String fx:value="Статус"/>
-                                     <String fx:value="Дедлайн"/>
-                                     <String fx:value="Фамилия и имя"/>
-                                     <String fx:value="ID"/>
+                                     <String fx:value="Статус" />
+                                     <String fx:value="Дедлайн" />
+                                     <String fx:value="ID" />
                                 </FXCollections>
                             </items>
                         </ComboBox>
                         <CheckBox fx:id="descInput" layoutX="185.0" layoutY="411.0" mnemonicParsing="false" text="по убыванию" />
-                        <Button fx:id="filterButton" layoutX="30.0" layoutY="455.0" mnemonicParsing="false" text="отфильтровать" onAction="#onTaskFilterButtonClick"/>
-                        <Button fx:id="genPDFButton" layoutX="154.0" layoutY="455.0" mnemonicParsing="false" text="сгенерировать отчёт" onAction="#onGeneratePdfButtonClick"/>
+                        <Button fx:id="filterButton" layoutX="30.0" layoutY="455.0" mnemonicParsing="false" onAction="#onTaskFilterButtonClick" text="отфильтровать" />
+                        <Button fx:id="genPDFButton" layoutX="154.0" layoutY="455.0" mnemonicParsing="false" onAction="#onGeneratePdfButtonClick" text="сгенерировать отчёт" />
                      </children>
                   </AnchorPane>
             </content>

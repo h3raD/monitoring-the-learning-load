@@ -41,7 +41,6 @@ public class SceneManager {
             primaryStage.centerOnScreen();
         } catch (IOException e) {
             System.err.println("Ошибка загрузки сцены: " + fxmlPath);
-            e.printStackTrace();
         }
     }
 }

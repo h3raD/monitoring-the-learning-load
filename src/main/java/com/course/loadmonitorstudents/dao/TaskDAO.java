@@ -2,10 +2,8 @@ package com.course.loadmonitorstudents.dao;
 
 import com.course.loadmonitorstudents.dto.TaskWithCuratorDTO;
 import com.course.loadmonitorstudents.dto.TaskWithStudentDTO;
-import com.course.loadmonitorstudents.model.StatusTask;
 import com.course.loadmonitorstudents.model.Task;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 

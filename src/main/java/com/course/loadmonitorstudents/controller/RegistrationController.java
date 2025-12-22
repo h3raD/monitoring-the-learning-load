@@ -4,10 +4,10 @@ import com.course.loadmonitorstudents.dao.UserDAO;
 import com.course.loadmonitorstudents.dao.db.UserDAOPSql;
 import com.course.loadmonitorstudents.model.Role;
 import com.course.loadmonitorstudents.model.User;
+import com.course.loadmonitorstudents.util.PasswordUtil;
 import com.course.loadmonitorstudents.util.SceneManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
@@ -15,10 +15,7 @@ import static com.course.loadmonitorstudents.util.Checker.*;
 
 public class RegistrationController {
 
-    private UserDAO userDao = new UserDAOPSql();
-
-    @FXML
-    private Button backButton;
+    private final UserDAO userDao = new UserDAOPSql();
 
     @FXML
     private TextField mailInput;
@@ -28,9 +25,6 @@ public class RegistrationController {
 
     @FXML
     private PasswordField passwordInput;
-
-    @FXML
-    private Button regButton;
 
     @FXML
     private TextField surnameInput;
@@ -72,7 +66,8 @@ public class RegistrationController {
             return;
         }
 
-        User user  = new User(-1L, mail, password, name, surname, Role.CURATOR, null, null, null);
+        String hashPassword = PasswordUtil.hashPassword(password);
+        User user  = new User(-1L, mail, hashPassword, name, surname, Role.CURATOR, null, null, null);
         userDao.create(user);
 
         showAlert("Успех", "Регистрация прошла успешно!\nТеперь вы можете войти в систему.", Alert.AlertType.INFORMATION);

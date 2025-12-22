@@ -2,7 +2,6 @@ package com.course.loadmonitorstudents.dao;
 
 import com.course.loadmonitorstudents.model.User;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface UserDAO {
@@ -13,4 +12,5 @@ public interface UserDAO {
     User findByIdAndCuratorId(Long id, Long curatorId) throws Exception;
     User findById(Long id) throws Exception;
     List<User> findAllStudentsByCuratorId(Long curatorId) throws Exception;
+    User findByEmail(String mail) throws Exception;
 }
