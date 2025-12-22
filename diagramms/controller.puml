@@ -1,0 +1,145 @@
+@startuml
+class com.course.loadmonitorstudents.controller.RegistrationController {
+- UserDAO userDao
+- TextField mailInput
+- TextField nameInput
+- PasswordField passwordInput
+- TextField surnameInput
+- void onRegButtonClick()
+- void clearFields()
+- void onBackButtonClick()
+- void showAlert(String,String,Alert.AlertType)
+}
+
+
+class com.course.loadmonitorstudents.controller.AuthorizationController {
+- UserDAO userDao
+- TextField mailInput
+- PasswordField passwordInput
+- void onAuthButtonClick()
+- void onRegButtonClick()
+- void showAlert(String,Alert.AlertType)
+}
+
+
+class com.course.loadmonitorstudents.controller.CuratorController {
+- UserDAO userDAO
+- TaskDAO taskDAO
+- ObservableList<User> studentData
+- ObservableList<TaskWithStudentDTO> taskData
+- TextField deadlineInput
+- CheckBox descInput
+- TextField descriptionInput
+- ComboBox<String> filtrInput
+- TextField idInputs
+- TextField idInputt
+- TextField mailInput
+- TextField nameInput
+- TextField passwordInput
+- ComboBox<String> statusInput
+- TextField studentIdInput
+- TextField surnameInput
+- TableView<TaskWithStudentDTO> taskTable
+- TableView<User> studentTable
+- TextField titleInput
+- TableColumn<User,Long> idColumn
+- TableColumn<User,String> nameColumn
+- TableColumn<User,String> surnameColumn
+- TableColumn<User,String> mailColumn
+- TableColumn<User,String> passwordColumn
+- TableColumn<TaskWithStudentDTO,Long> taskIdColumn
+- TableColumn<TaskWithStudentDTO,String> taskTitleColumn
+- TableColumn<TaskWithStudentDTO,String> taskDescriptionColumn
+- TableColumn<TaskWithStudentDTO,String> taskStatusColumn
+- TableColumn<TaskWithStudentDTO,String> taskDeadlineColumn
+- TableColumn<TaskWithStudentDTO,String> taskStartColumn
+- TableColumn<TaskWithStudentDTO,String> taskEndColumn
+- TableColumn<TaskWithStudentDTO,String> taskStudentLastNameColumn
+- TableColumn<TaskWithStudentDTO,String> taskStudentFirstNameColumn
+- TableColumn<TaskWithStudentDTO,Long> taskStudentIdColumn
++ void initialize()
+- void setupStudentTableColumns()
+- void setupTaskTableColumns()
+- String formatDateTime(LocalDateTime)
+- void onAddButtonsClick()
+- void onUpdateButtonsClick()
+- void onDeleteButtonsClick()
+- void onAddButtontClick()
+- void onUpdateButtontClick()
+- void onDeleteButtontClick()
+- void onTaskFilterButtonClick()
+- void onGeneratePdfButtonClick()
+- void showAlert(String,String,Alert.AlertType)
+- void loadStudentsToTable()
+- void loadTasksToTable()
+- void clearInputFieldsStudents()
+- void clearInputFieldsTasks()
+- String getStatusForFilter()
+- String showStatusDialog()
+- void updateTaskTable(List<TaskWithStudentDTO>)
+- void initializeFilterComboBox()
+}
+
+
+class com.course.loadmonitorstudents.controller.StudentController {
+- UserDAO userDAO
+- TaskDAO taskDAO
+- RestDAO restDAO
+- ObservableList<TaskWithCuratorDTO> taskData
+- ObservableList<Rest> restData
+- GoogleCalendarService googleCalendarService
+- TextField tgInput
+- TextField passwordInput
+- TextField googleInput
+- TableColumn<TaskWithCuratorDTO,String> curatorSNColumn
+- TableColumn<Rest,String> dataColumn
+- TableColumn<TaskWithCuratorDTO,String> deadlineColumn
+- CheckBox descInputt
+- TableColumn<TaskWithCuratorDTO,String> descriptionColumn
+- TableColumn<TaskWithCuratorDTO,String> endColumn
+- TextField endInput
+- ComboBox<String> filtrInputt
+- TableColumn<Rest,String> hoursColumn
+- TextField hoursInput
+- TextField dataInput
+- TableColumn<Rest,Long> idColumnRest
+- TableColumn<TaskWithCuratorDTO,Long> idColumnt
+- TableColumn<TaskWithCuratorDTO,Long> idCuratorColumn
+- TextField idInputt
+- TableView<Rest> restTable
+- TableColumn<TaskWithCuratorDTO,String> startColumn
+- TextField startInput
+- TableColumn<TaskWithCuratorDTO,String> statusColumn
+- TableView<TaskWithCuratorDTO> taskTable
+- TableColumn<TaskWithCuratorDTO,String> titleColumn
+- TableView<User> settingsTable
+- TableColumn<User,String> telegramColumn
+- TableColumn<User,String> googleColumn
+- TableColumn<User,String> passwordColumn
+- ObservableList<User> settingsData
++ void initialize()
+- void setupSettingsTableColumns()
+- void loadSettingsToTable()
+- void onCalendarInputtClick()
+- void setupTaskTableColumns()
+- void setupRestTableColumns()
+- void loadTasksToTable()
+- void updateRestTable(List<Rest>)
+- void loadRestsToTable()
+- void updateTaskTable(List<TaskWithCuratorDTO>)
+- String formatDate(LocalDate)
+- String formatDateTime(LocalDateTime)
+- void onFilterButtontClick()
+- void onResetFilters()
+- void onAddButtontClick()
+- void onAddButtontgpClick()
+- void onUpdateButtontgpClick()
+- void onAddButtonRestClick()
+- void clearInputFields()
+- String showStatusDialog()
+- String showInputDialog()
+- void showAlert(String,String,Alert.AlertType)
+}
+
+
+@enduml

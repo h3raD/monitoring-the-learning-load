@@ -1,0 +1,29 @@
+@startuml
+class com.course.loadmonitorstudents.config.ApplicationConfig {
+- {static} User currentUser
++ {static} String googleindent
++ {static} void setCurrentUser(User)
++ {static} User getCurrentUser()
++ {static} Long getCurrentUserId()
++ {static} boolean isLoggedIn()
++ {static} void logout()
+}
+
+
+class com.course.loadmonitorstudents.config.AppLifecycleService {
+- {static} boolean isInitialized
++ {static} void initialize()
++ {static} void shutdown()
+}
+
+
+class com.course.loadmonitorstudents.config.DatabaseConfig {
+- {static} String URL
+- {static} String USER
+- {static} String PASSWORD
+- {static} Connection connection
++ {static} Connection getConnection()
+}
+
+
+@enduml

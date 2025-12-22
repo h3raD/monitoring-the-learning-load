@@ -1,0 +1,49 @@
+@startuml
+class com.course.loadmonitorstudents.dao.db.UserDAOPSql {
+- User map(ResultSet)
++ void create(User)
++ void update(User)
++ void delete(Long)
++ User findIdByEmailAndPassword(String,String)
++ User findByEmail(String)
++ User findById(Long)
++ User findByIdAndCuratorId(Long,Long)
++ List<User> findAllStudentsByCuratorId(Long)
+}
+
+class com.course.loadmonitorstudents.dao.db.TaskDAOPSql {
+- Task map(ResultSet)
++ void create(Task)
++ void update(Task)
++ void delete(Long)
++ Task getById(Long)
++ LocalDateTime getDeadline(Long)
++ Task getTaskByIdAndTaskId(Long,Long)
++ List<TaskWithStudentDTO> findAllTasksWithStudentByCuratorId(Long)
++ List<TaskWithStudentDTO> findTasksByStatus(Long,String,boolean)
++ List<TaskWithStudentDTO> findTasksByDeadline(Long,boolean)
++ List<TaskWithStudentDTO> findTasksByStudentName(Long,String,boolean)
++ List<TaskWithStudentDTO> findTasksById(Long,Long,boolean)
+- List<TaskWithStudentDTO> executeTaskQuery(String,Object)
++ List<TaskWithCuratorDTO> findAllTasksByStudentId(Long)
++ List<TaskWithCuratorDTO> findTasksByStatusForStudent(Long,String,boolean)
++ List<TaskWithCuratorDTO> findTasksByDeadlineForStudent(Long,boolean)
++ List<TaskWithCuratorDTO> findTasksByCuratorNameForStudent(Long,String,boolean)
++ List<TaskWithCuratorDTO> findTaskByIdForStudent(Long,Long,boolean)
+- List<TaskWithCuratorDTO> executeStudentTaskQuery(String,Object)
+}
+
+class com.course.loadmonitorstudents.dao.db.RestDAOPSql {
++ void create(Rest)
++ void update(Rest)
++ void delete(Long)
++ List<Rest> findByStudentId(Long)
+- Rest map(ResultSet)
+}
+
+
+
+com.course.loadmonitorstudents.dao.UserDAO <|.. com.course.loadmonitorstudents.dao.db.UserDAOPSql
+com.course.loadmonitorstudents.dao.TaskDAO <|.. com.course.loadmonitorstudents.dao.db.TaskDAOPSql
+com.course.loadmonitorstudents.dao.RestDAO <|.. com.course.loadmonitorstudents.dao.db.RestDAOPSql
+@enduml

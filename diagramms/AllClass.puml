@@ -1,0 +1,508 @@
+@startuml
+class com.course.loadmonitorstudents.controller.AuthorizationController {
+- UserDAO userDao
+- TextField mailInput
+- PasswordField passwordInput
+- void onAuthButtonClick()
+- void onRegButtonClick()
+- void showAlert(String,Alert.AlertType)
+}
+
+
+class com.course.loadmonitorstudents.service.TelegramNotificationService {
+- {static} String BOT_TOKEN
+- {static} TelegramNotificationService instance
+- ScheduledExecutorService scheduler
+- boolean isRunning
+- UserDAO userDAO
++ {static} TelegramNotificationService getInstance()
++ void sendNotificationToStudent(Long,String)
++ void notifyNewTask(Task)
++ void notifyDeadlineApproaching(Task)
++ void notifySleepRecommendation(Long,int)
+- void sendHtmlMessage(Long,String)
+- void sendPlainMessage(Long,String)
+- String stripHtml(String)
+- String escapeHtml(String)
+- String formatDateTime(LocalDateTime)
++ void registerStudentChatId(Long,Long)
++ void startBackgroundMonitoring()
++ void stop()
+}
+
+
+class com.course.loadmonitorstudents.controller.CuratorController {
+- UserDAO userDAO
+- TaskDAO taskDAO
+- ObservableList<User> studentData
+- ObservableList<TaskWithStudentDTO> taskData
+- TextField deadlineInput
+- CheckBox descInput
+- TextField descriptionInput
+- ComboBox<String> filtrInput
+- TextField idInputs
+- TextField idInputt
+- TextField mailInput
+- TextField nameInput
+- TextField passwordInput
+- ComboBox<String> statusInput
+- TextField studentIdInput
+- TextField surnameInput
+- TableView<TaskWithStudentDTO> taskTable
+- TableView<User> studentTable
+- TextField titleInput
+- TableColumn<User,Long> idColumn
+- TableColumn<User,String> nameColumn
+- TableColumn<User,String> surnameColumn
+- TableColumn<User,String> mailColumn
+- TableColumn<User,String> passwordColumn
+- TableColumn<TaskWithStudentDTO,Long> taskIdColumn
+- TableColumn<TaskWithStudentDTO,String> taskTitleColumn
+- TableColumn<TaskWithStudentDTO,String> taskDescriptionColumn
+- TableColumn<TaskWithStudentDTO,String> taskStatusColumn
+- TableColumn<TaskWithStudentDTO,String> taskDeadlineColumn
+- TableColumn<TaskWithStudentDTO,String> taskStartColumn
+- TableColumn<TaskWithStudentDTO,String> taskEndColumn
+- TableColumn<TaskWithStudentDTO,String> taskStudentLastNameColumn
+- TableColumn<TaskWithStudentDTO,String> taskStudentFirstNameColumn
+- TableColumn<TaskWithStudentDTO,Long> taskStudentIdColumn
++ void initialize()
+- void setupStudentTableColumns()
+- void setupTaskTableColumns()
+- String formatDateTime(LocalDateTime)
+- void onAddButtonsClick()
+- void onUpdateButtonsClick()
+- void onDeleteButtonsClick()
+- void onAddButtontClick()
+- void onUpdateButtontClick()
+- void onDeleteButtontClick()
+- void onTaskFilterButtonClick()
+- void onGeneratePdfButtonClick()
+- void showAlert(String,String,Alert.AlertType)
+- void loadStudentsToTable()
+- void loadTasksToTable()
+- void clearInputFieldsStudents()
+- void clearInputFieldsTasks()
+- String getStatusForFilter()
+- String showStatusDialog()
+- void updateTaskTable(List<TaskWithStudentDTO>)
+- void initializeFilterComboBox()
+}
+
+
+class com.course.loadmonitorstudents.util.SceneManager {
+- {static} Stage primaryStage
++ {static} void setPrimaryStage(Stage)
++ {static} void switchToAuthScene()
++ {static} void switchToRegScene()
++ {static} void switchToCuratorDashboard()
++ {static} void switchToStudentDashboard()
+- {static} void loadScene(String,String)
+}
+
+
+class com.course.loadmonitorstudents.dao.db.TaskDAOPSql {
+- Task map(ResultSet)
++ void create(Task)
++ void update(Task)
++ void delete(Long)
++ Task getById(Long)
++ LocalDateTime getDeadline(Long)
++ Task getTaskByIdAndTaskId(Long,Long)
++ List<TaskWithStudentDTO> findAllTasksWithStudentByCuratorId(Long)
++ List<TaskWithStudentDTO> findTasksByStatus(Long,String,boolean)
++ List<TaskWithStudentDTO> findTasksByDeadline(Long,boolean)
++ List<TaskWithStudentDTO> findTasksByStudentName(Long,String,boolean)
++ List<TaskWithStudentDTO> findTasksById(Long,Long,boolean)
+- List<TaskWithStudentDTO> executeTaskQuery(String,Object)
++ List<TaskWithCuratorDTO> findAllTasksByStudentId(Long)
++ List<TaskWithCuratorDTO> findTasksByStatusForStudent(Long,String,boolean)
++ List<TaskWithCuratorDTO> findTasksByDeadlineForStudent(Long,boolean)
++ List<TaskWithCuratorDTO> findTasksByCuratorNameForStudent(Long,String,boolean)
++ List<TaskWithCuratorDTO> findTaskByIdForStudent(Long,Long,boolean)
+- List<TaskWithCuratorDTO> executeStudentTaskQuery(String,Object)
+}
+
+class com.course.loadmonitorstudents.dto.TaskWithStudentDTO {
+- Long id
+- String title
+- String description
+- StatusTask status
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- String studentLastName
+- String studentFirstName
+- Long studentId
++ Long getId()
++ String getTitle()
++ String getDescription()
++ StatusTask getStatus()
++ LocalDateTime getDeadline()
++ LocalDateTime getStartWork()
++ LocalDateTime getEndWork()
++ String getStudentLastName()
++ String getStudentFirstName()
++ Long getStudentId()
++ String getDeadlineString()
++ String getStartWorkString()
++ String getEndWorkString()
++ String getStatusString()
+}
+
+
+class com.course.loadmonitorstudents.model.User {
+- Long id
+- String email
+- String password
+- String firstName
+- String lastName
+- Role role
+- Long curatorId
+- Long telegramID
+- String googleCalendarApiKey
++ Long getId()
++ void setId(Long)
++ String getEmail()
++ void setEmail(String)
++ String getPassword()
++ void setPassword(String)
++ String getFirstName()
++ void setFirstName(String)
++ String getLastName()
++ void setLastName(String)
++ Role getRole()
++ void setRole(Role)
++ Long getCuratorId()
++ void setCuratorId(Long)
++ Long getTelegramID()
++ void setTelegramID(Long)
++ String getGoogleCalendarApiKey()
++ void setGoogleCalendarApiKey(String)
+}
+
+
+class com.course.loadmonitorstudents.model.Task {
+- Long id
+- String title
+- String description
+- LocalDateTime addTime
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- StatusTask status
+- Long studentId
+- Long curatorId
++ Long getId()
++ void setId(Long)
++ String getTitle()
++ void setTitle(String)
++ String getDescription()
++ void setDescription(String)
++ LocalDateTime getAddTime()
++ void setAddTime(LocalDateTime)
++ LocalDateTime getDeadline()
++ void setDeadline(LocalDateTime)
++ LocalDateTime getStartWork()
++ void setStartWork(LocalDateTime)
++ LocalDateTime getEndWork()
++ void setEndWork(LocalDateTime)
++ StatusTask getStatus()
++ void setStatus(StatusTask)
++ Long getStudentId()
++ void setStudentId(Long)
++ Long getCuratorId()
++ void setCuratorId(Long)
+}
+
+
+class com.course.loadmonitorstudents.config.DatabaseConfig {
+- {static} String URL
+- {static} String USER
+- {static} String PASSWORD
+- {static} Connection connection
++ {static} Connection getConnection()
+}
+
+
+class com.course.loadmonitorstudents.util.PasswordUtil {
++ {static} String hashPassword(String)
++ {static} boolean verifyPassword(String,String)
+}
+
+class com.course.loadmonitorstudents.LoadMonitor {
++ void start(Stage)
+}
+
+interface com.course.loadmonitorstudents.dao.RestDAO {
+~ List<Rest> findByStudentId(Long)
+~ void create(Rest)
+~ void update(Rest)
+~ void delete(Long)
+}
+
+class com.course.loadmonitorstudents.dto.TaskWithCuratorDTO {
+- Long id
+- String title
+- String description
+- StatusTask status
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- Long curatorId
+- String curatorFirstName
+- String curatorLastName
++ Long getId()
++ String getTitle()
++ String getDescription()
++ StatusTask getStatus()
++ LocalDateTime getDeadline()
++ LocalDateTime getStartWork()
++ LocalDateTime getEndWork()
++ Long getCuratorId()
++ String getCuratorFirstName()
++ String getCuratorLastName()
++ String getCuratorFullName()
+}
+
+
+enum com.course.loadmonitorstudents.model.StatusTask {
++  TO_DO
++  IN_PROGRESS
++  DONE
++  OVERDUE
+}
+
+enum com.course.loadmonitorstudents.model.Role {
++  CURATOR
++  STUDENT
+}
+
+class com.course.loadmonitorstudents.controller.StudentController {
+- UserDAO userDAO
+- TaskDAO taskDAO
+- RestDAO restDAO
+- ObservableList<TaskWithCuratorDTO> taskData
+- ObservableList<Rest> restData
+- GoogleCalendarService googleCalendarService
+- TextField tgInput
+- TextField passwordInput
+- TextField googleInput
+- TableColumn<TaskWithCuratorDTO,String> curatorSNColumn
+- TableColumn<Rest,String> dataColumn
+- TableColumn<TaskWithCuratorDTO,String> deadlineColumn
+- CheckBox descInputt
+- TableColumn<TaskWithCuratorDTO,String> descriptionColumn
+- TableColumn<TaskWithCuratorDTO,String> endColumn
+- TextField endInput
+- ComboBox<String> filtrInputt
+- TableColumn<Rest,String> hoursColumn
+- TextField hoursInput
+- TextField dataInput
+- TableColumn<Rest,Long> idColumnRest
+- TableColumn<TaskWithCuratorDTO,Long> idColumnt
+- TableColumn<TaskWithCuratorDTO,Long> idCuratorColumn
+- TextField idInputt
+- TableView<Rest> restTable
+- TableColumn<TaskWithCuratorDTO,String> startColumn
+- TextField startInput
+- TableColumn<TaskWithCuratorDTO,String> statusColumn
+- TableView<TaskWithCuratorDTO> taskTable
+- TableColumn<TaskWithCuratorDTO,String> titleColumn
+- TableView<User> settingsTable
+- TableColumn<User,String> telegramColumn
+- TableColumn<User,String> googleColumn
+- TableColumn<User,String> passwordColumn
+- ObservableList<User> settingsData
++ void initialize()
+- void setupSettingsTableColumns()
+- void loadSettingsToTable()
+- void onCalendarInputtClick()
+- void setupTaskTableColumns()
+- void setupRestTableColumns()
+- void loadTasksToTable()
+- void updateRestTable(List<Rest>)
+- void loadRestsToTable()
+- void updateTaskTable(List<TaskWithCuratorDTO>)
+- String formatDate(LocalDate)
+- String formatDateTime(LocalDateTime)
+- void onFilterButtontClick()
+- void onResetFilters()
+- void onAddButtontClick()
+- void onAddButtontgpClick()
+- void onUpdateButtontgpClick()
+- void onAddButtonRestClick()
+- void clearInputFields()
+- String showStatusDialog()
+- String showInputDialog()
+- void showAlert(String,String,Alert.AlertType)
+}
+
+
+interface com.course.loadmonitorstudents.dao.TaskDAO {
+~ void create(Task)
+~ void update(Task)
+~ void delete(Long)
+~ LocalDateTime getDeadline(Long)
+~ Task getById(Long)
+~ Task getTaskByIdAndTaskId(Long,Long)
+~ List<TaskWithStudentDTO> findAllTasksWithStudentByCuratorId(Long)
+~ List<TaskWithCuratorDTO> findAllTasksByStudentId(Long)
+~ List<TaskWithCuratorDTO> findTaskByIdForStudent(Long,Long,boolean)
+~ List<TaskWithCuratorDTO> findTasksByCuratorNameForStudent(Long,String,boolean)
+~ List<TaskWithCuratorDTO> findTasksByStatusForStudent(Long,String,boolean)
+~ List<TaskWithCuratorDTO> findTasksByDeadlineForStudent(Long,boolean)
+~ List<TaskWithStudentDTO> findTasksByStatus(Long,String,boolean)
+~ List<TaskWithStudentDTO> findTasksByDeadline(Long,boolean)
+~ List<TaskWithStudentDTO> findTasksByStudentName(Long,String,boolean)
+~ List<TaskWithStudentDTO> findTasksById(Long,Long,boolean)
+}
+
+class com.course.loadmonitorstudents.model.Rest {
+- Long id
+- LocalDate date
+- Integer hours
+- Long studentId
++ Long getId()
++ void setId(Long)
++ LocalDate getDate()
++ void setDate(LocalDate)
++ Long getStudentId()
++ void setStudentId(Long)
++ Integer getHours()
++ void setHours(Integer)
+}
+
+
+class com.course.loadmonitorstudents.controller.RegistrationController {
+- UserDAO userDao
+- TextField mailInput
+- TextField nameInput
+- PasswordField passwordInput
+- TextField surnameInput
+- void onRegButtonClick()
+- void clearFields()
+- void onBackButtonClick()
+- void showAlert(String,String,Alert.AlertType)
+}
+
+
+class com.course.loadmonitorstudents.config.ApplicationConfig {
+- {static} User currentUser
++ {static} String googleindent
++ {static} void setCurrentUser(User)
++ {static} User getCurrentUser()
++ {static} Long getCurrentUserId()
++ {static} boolean isLoggedIn()
++ {static} void logout()
+}
+
+
+class com.course.loadmonitorstudents.service.GoogleCalendarService {
+- {static} String APPLICATION_NAME
+- {static} JsonFactory JSON_FACTORY
+- {static} String TOKENS_DIRECTORY_PATH
+- {static} String CALENDAR_ID
+- {static} List<String> SCOPES
+- {static} String CREDENTIALS_FILE_PATH
+- {static} String REDIRECT_URI
+- Calendar calendarService
+- GoogleClientSecrets clientSecrets
+- GoogleClientSecrets loadClientSecrets()
+- Credential getCredentials(NetHttpTransport,GoogleClientSecrets)
+- Credential authorizeWithDialog(GoogleAuthorizationCodeFlow,GoogleClientSecrets)
+- void showAuthorizationDialog(String)
+- String getAuthorizationCodeFromDialog()
+- InputStream getResourceAsStream(String)
++ String createTaskEvent(Task)
+- void showSuccessDialog(Event)
+- void showErrorDialog(String,String)
+- void handleGoogleCalendarError(IOException)
+- String createEventSummary(Task)
+- String createEventDescription(Task)
+- EventDateTime createEventDateTime(LocalDateTime)
+- String formatDateTime(LocalDateTime)
+- String getColorIdByStatus(String)
++ boolean testConnection()
++ void showInfoDialog()
++ {static} Credential authorizeManually()
+}
+
+
+class com.course.loadmonitorstudents.config.AppLifecycleService {
+- {static} boolean isInitialized
++ {static} void initialize()
++ {static} void shutdown()
+}
+
+
+interface com.course.loadmonitorstudents.dao.UserDAO {
+~ void create(User)
+~ void update(User)
+~ void delete(Long)
+~ User findIdByEmailAndPassword(String,String)
+~ User findByIdAndCuratorId(Long,Long)
+~ User findById(Long)
+~ List<User> findAllStudentsByCuratorId(Long)
+~ User findByEmail(String)
+}
+
+class com.course.loadmonitorstudents.dao.db.UserDAOPSql {
+- User map(ResultSet)
++ void create(User)
++ void update(User)
++ void delete(Long)
++ User findIdByEmailAndPassword(String,String)
++ User findByEmail(String)
++ User findById(Long)
++ User findByIdAndCuratorId(Long,Long)
++ List<User> findAllStudentsByCuratorId(Long)
+}
+
+class com.course.loadmonitorstudents.util.Checker {
++ {static} boolean isValidEmail(String)
++ {static} boolean noSpacesNoDigits(String)
++ {static} boolean isAlphanumericNoSpaces(String)
++ {static} boolean isId(String)
++ {static} boolean checkDate(String,DateTimeFormatter)
+}
+
+class com.course.loadmonitorstudents.Launcher {
++ {static} void main(String[])
+}
+
+class com.course.loadmonitorstudents.service.PdfReportGenerator {
+- {static} DateTimeFormatter DATE_FORMATTER
+- {static} PDFont loadCyrillicFont(PDDocument)
++ {static} void generateTaskReport(List<TaskWithStudentDTO>,String,boolean,String)
++ {static} void generateUserReport(List<User>,String)
+- {static} void drawTableHeader(PDPageContentStream,PDFont,float,float,float,String[],float[])
+- {static} void drawTableRow(PDPageContentStream,PDFont,float,float,float,String[],float[])
+}
+
+
+class com.course.loadmonitorstudents.dao.db.RestDAOPSql {
++ void create(Rest)
++ void update(Rest)
++ void delete(Long)
++ List<Rest> findByStudentId(Long)
+- Rest map(ResultSet)
+}
+
+class com.course.loadmonitorstudents.service.TelegramBotStarter {
+- {static} String BOT_TOKEN
+- {static} boolean running
++ {static} void startBot()
+- {static} String getUpdates(int)
+- {static} void sendSimpleMessage(Long,String)
++ {static} void stopBot()
+}
+
+
+
+
+com.course.loadmonitorstudents.dao.TaskDAO <|.. com.course.loadmonitorstudents.dao.db.TaskDAOPSql
+javafx.application.Application <|-- com.course.loadmonitorstudents.LoadMonitor
+com.course.loadmonitorstudents.dao.UserDAO <|.. com.course.loadmonitorstudents.dao.db.UserDAOPSql
+com.course.loadmonitorstudents.dao.RestDAO <|.. com.course.loadmonitorstudents.dao.db.RestDAOPSql
+@enduml

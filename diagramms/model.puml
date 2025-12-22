@@ -1,0 +1,95 @@
+@startuml
+class com.course.loadmonitorstudents.model.User {
+- Long id
+- String email
+- String password
+- String firstName
+- String lastName
+- Role role
+- Long curatorId
+- Long telegramID
+- String googleCalendarApiKey
++ Long getId()
++ void setId(Long)
++ String getEmail()
++ void setEmail(String)
++ String getPassword()
++ void setPassword(String)
++ String getFirstName()
++ void setFirstName(String)
++ String getLastName()
++ void setLastName(String)
++ Role getRole()
++ void setRole(Role)
++ Long getCuratorId()
++ void setCuratorId(Long)
++ Long getTelegramID()
++ void setTelegramID(Long)
++ String getGoogleCalendarApiKey()
++ void setGoogleCalendarApiKey(String)
+}
+
+
+class com.course.loadmonitorstudents.model.Task {
+- Long id
+- String title
+- String description
+- LocalDateTime addTime
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- StatusTask status
+- Long studentId
+- Long curatorId
++ Long getId()
++ void setId(Long)
++ String getTitle()
++ void setTitle(String)
++ String getDescription()
++ void setDescription(String)
++ LocalDateTime getAddTime()
++ void setAddTime(LocalDateTime)
++ LocalDateTime getDeadline()
++ void setDeadline(LocalDateTime)
++ LocalDateTime getStartWork()
++ void setStartWork(LocalDateTime)
++ LocalDateTime getEndWork()
++ void setEndWork(LocalDateTime)
++ StatusTask getStatus()
++ void setStatus(StatusTask)
++ Long getStudentId()
++ void setStudentId(Long)
++ Long getCuratorId()
++ void setCuratorId(Long)
+}
+
+
+enum com.course.loadmonitorstudents.model.StatusTask {
++  TO_DO
++  IN_PROGRESS
++  DONE
++  OVERDUE
+}
+
+enum com.course.loadmonitorstudents.model.Role {
++  CURATOR
++  STUDENT
+}
+
+class com.course.loadmonitorstudents.model.Rest {
+- Long id
+- LocalDate date
+- Integer hours
+- Long studentId
++ Long getId()
++ void setId(Long)
++ LocalDate getDate()
++ void setDate(LocalDate)
++ Long getStudentId()
++ void setStudentId(Long)
++ Integer getHours()
++ void setHours(Integer)
+}
+
+
+@enduml

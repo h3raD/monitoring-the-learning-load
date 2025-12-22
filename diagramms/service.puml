@@ -1,0 +1,75 @@
+@startuml
+class com.course.loadmonitorstudents.service.TelegramNotificationService {
+- {static} String BOT_TOKEN
+- {static} TelegramNotificationService instance
+- ScheduledExecutorService scheduler
+- boolean isRunning
+- UserDAO userDAO
++ {static} TelegramNotificationService getInstance()
++ void sendNotificationToStudent(Long,String)
++ void notifyNewTask(Task)
++ void notifyDeadlineApproaching(Task)
++ void notifySleepRecommendation(Long,int)
+- void sendHtmlMessage(Long,String)
+- void sendPlainMessage(Long,String)
+- String stripHtml(String)
+- String escapeHtml(String)
+- String formatDateTime(LocalDateTime)
++ void registerStudentChatId(Long,Long)
++ void startBackgroundMonitoring()
++ void stop()
+}
+
+
+class com.course.loadmonitorstudents.service.GoogleCalendarService {
+- {static} String APPLICATION_NAME
+- {static} JsonFactory JSON_FACTORY
+- {static} String TOKENS_DIRECTORY_PATH
+- {static} String CALENDAR_ID
+- {static} List<String> SCOPES
+- {static} String CREDENTIALS_FILE_PATH
+- {static} String REDIRECT_URI
+- Calendar calendarService
+- GoogleClientSecrets clientSecrets
+- GoogleClientSecrets loadClientSecrets()
+- Credential getCredentials(NetHttpTransport,GoogleClientSecrets)
+- Credential authorizeWithDialog(GoogleAuthorizationCodeFlow,GoogleClientSecrets)
+- void showAuthorizationDialog(String)
+- String getAuthorizationCodeFromDialog()
+- InputStream getResourceAsStream(String)
++ String createTaskEvent(Task)
+- void showSuccessDialog(Event)
+- void showErrorDialog(String,String)
+- void handleGoogleCalendarError(IOException)
+- String createEventSummary(Task)
+- String createEventDescription(Task)
+- EventDateTime createEventDateTime(LocalDateTime)
+- String formatDateTime(LocalDateTime)
+- String getColorIdByStatus(String)
++ boolean testConnection()
++ void showInfoDialog()
++ {static} Credential authorizeManually()
+}
+
+
+class com.course.loadmonitorstudents.service.PdfReportGenerator {
+- {static} DateTimeFormatter DATE_FORMATTER
+- {static} PDFont loadCyrillicFont(PDDocument)
++ {static} void generateTaskReport(List<TaskWithStudentDTO>,String,boolean,String)
++ {static} void generateUserReport(List<User>,String)
+- {static} void drawTableHeader(PDPageContentStream,PDFont,float,float,float,String[],float[])
+- {static} void drawTableRow(PDPageContentStream,PDFont,float,float,float,String[],float[])
+}
+
+
+class com.course.loadmonitorstudents.service.TelegramBotStarter {
+- {static} String BOT_TOKEN
+- {static} boolean running
++ {static} void startBot()
+- {static} String getUpdates(int)
+- {static} void sendSimpleMessage(Long,String)
++ {static} void stopBot()
+}
+
+
+@enduml

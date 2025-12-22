@@ -1,0 +1,26 @@
+@startuml
+class com.course.loadmonitorstudents.util.SceneManager {
+- {static} Stage primaryStage
++ {static} void setPrimaryStage(Stage)
++ {static} void switchToAuthScene()
++ {static} void switchToRegScene()
++ {static} void switchToCuratorDashboard()
++ {static} void switchToStudentDashboard()
+- {static} void loadScene(String,String)
+}
+
+
+class com.course.loadmonitorstudents.util.Checker {
++ {static} boolean isValidEmail(String)
++ {static} boolean noSpacesNoDigits(String)
++ {static} boolean isAlphanumericNoSpaces(String)
++ {static} boolean isId(String)
++ {static} boolean checkDate(String,DateTimeFormatter)
+}
+
+class com.course.loadmonitorstudents.util.PasswordUtil {
++ {static} String hashPassword(String)
++ {static} boolean verifyPassword(String,String)
+}
+
+@enduml

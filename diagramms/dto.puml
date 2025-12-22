@@ -1,0 +1,55 @@
+@startuml
+class com.course.loadmonitorstudents.dto.TaskWithCuratorDTO {
+- Long id
+- String title
+- String description
+- StatusTask status
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- Long curatorId
+- String curatorFirstName
+- String curatorLastName
++ Long getId()
++ String getTitle()
++ String getDescription()
++ StatusTask getStatus()
++ LocalDateTime getDeadline()
++ LocalDateTime getStartWork()
++ LocalDateTime getEndWork()
++ Long getCuratorId()
++ String getCuratorFirstName()
++ String getCuratorLastName()
++ String getCuratorFullName()
+}
+
+
+class com.course.loadmonitorstudents.dto.TaskWithStudentDTO {
+- Long id
+- String title
+- String description
+- StatusTask status
+- LocalDateTime deadline
+- LocalDateTime startWork
+- LocalDateTime endWork
+- String studentLastName
+- String studentFirstName
+- Long studentId
++ Long getId()
++ String getTitle()
++ String getDescription()
++ StatusTask getStatus()
++ LocalDateTime getDeadline()
++ LocalDateTime getStartWork()
++ LocalDateTime getEndWork()
++ String getStudentLastName()
++ String getStudentFirstName()
++ Long getStudentId()
++ String getDeadlineString()
++ String getStartWorkString()
++ String getEndWorkString()
++ String getStatusString()
+}
+
+
+@enduml
