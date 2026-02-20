@@ -28,7 +28,7 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+.build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -37,3 +37,10 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Configuration & Credentials ###
+.src/main/resources/application.properties
+.src/main/resources/google/secret.json
+.tokens/
+
+loadmonitor.db

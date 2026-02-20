@@ -29,6 +29,12 @@ public class RegistrationController {
     @FXML
     private TextField surnameInput;
 
+    /**
+     * Обрабатывает кнопку регистрации.
+     * Проверяет данные и сохраняет нового пользователя.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onRegButtonClick() throws Exception {
         String name = nameInput.getText().trim();
@@ -81,12 +87,22 @@ public class RegistrationController {
         passwordInput.clear();
     }
 
+    /**
+     * Обрабатывает кнопку возврата к авторизации.
+     */
     @FXML
     private void onBackButtonClick() {
         clearFields();
         SceneManager.switchToAuthScene();
     }
 
+    /**
+     * Отображает диалог.
+     *
+     * @param title заголовок
+     * @param message текст
+     * @param type тип
+     */
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

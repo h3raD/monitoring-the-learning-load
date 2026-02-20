@@ -1,14 +1,18 @@
 package com.course.loadmonitorstudents.service;
 
+import com.course.loadmonitorstudents.config.ApplicationConfig;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class TelegramBotStarter {
-    private static final String BOT_TOKEN = "8063383111:AAF6_U_WhyAgOd6-lF_xrT6ua-8f8GieCWw";
+    private static final String BOT_TOKEN = ApplicationConfig.getTelegramBotToken();
     private static volatile boolean running = true;
 
+    /**
+     * Запускает Telegram бот.
+     */
     public static void startBot() {
         Thread botThread = new Thread(() -> {
             System.out.println("Telegram бот запускается...");
@@ -145,6 +149,12 @@ public class TelegramBotStarter {
         }
     }
 
+    /**
+     * Отправляет сообщение через Telegram.
+     *
+     * @param chatId ID чата
+     * @param text текст сообщения
+     */
     private static void sendSimpleMessage(Long chatId, String text) {
         try {
             String urlString = String.format(
@@ -178,6 +188,9 @@ public class TelegramBotStarter {
         }
     }
 
+    /**
+     * Останавливает Telegram бот.
+     */
     public static void stopBot() {
         running = false;
     }

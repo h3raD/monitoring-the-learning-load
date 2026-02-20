@@ -19,6 +19,13 @@ public class PdfReportGenerator {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
+    /**
+     * Загружает кириллический шрифт для PDF.
+     *
+     * @param document PDF документ
+     * @return матрица шрифта
+     * @throws IOException если не удался загрузить шрифт
+     */
     private static PDFont loadCyrillicFont(PDDocument document) throws IOException {
         try {
             InputStream fontStream = null;
@@ -54,6 +61,15 @@ public class PdfReportGenerator {
         }
     }
 
+    /**
+     * Генерирует PDF отчет по задачам.
+     *
+     * @param tasks лист задач
+     * @param filterType тип фильтрации
+     * @param descending если true — сортировка по убыванию
+     * @param filePath путь к экспортированному файлу
+     * @throws IOException если ошибка генерации PDF
+     */
     public static void generateTaskReport(List<TaskWithStudentDTO> tasks,
                                           String filterType,
                                           boolean descending,
@@ -157,6 +173,13 @@ public class PdfReportGenerator {
         }
     }
 
+    /**
+     * Генерирует PDF отчет по пользователям (без паролей).
+     *
+     * @param users лист пользователей
+     * @param filePath путь к экспортированному файлу
+     * @throws IOException если ошибка генерации PDF
+     */
     public static void generateUserReport(List<User> users, String filePath) throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDFont font = loadCyrillicFont(document);
@@ -245,6 +268,18 @@ public class PdfReportGenerator {
         }
     }
 
+    /**
+     * Устанавливает заголовок таблицы в PDF.
+     *
+     * @param contentStream поток содержимого
+     * @param font шрифт
+     * @param x X-координата
+     * @param y Y-координата
+     * @param width ширина таблицы
+     * @param headers массив заголовков
+     * @param columnWidths ширины колонок
+     * @throws IOException если ошибка при установке
+     */
     private static void drawTableHeader(PDPageContentStream contentStream, PDFont font,
                                         float x, float y, float width,
                                         String[] headers, float[] columnWidths) throws IOException {
@@ -265,6 +300,18 @@ public class PdfReportGenerator {
         }
     }
 
+    /**
+     * Устанавливает строку таблицы в PDF.
+     *
+     * @param contentStream поток содержимого
+     * @param font шрифт
+     * @param x X-координата
+     * @param y Y-координата
+     * @param width ширина таблицы
+     * @param rowData данные строки
+     * @param columnWidths ширины колонок
+     * @throws IOException если ошибка при рисовке
+     */
     private static void drawTableRow(PDPageContentStream contentStream, PDFont font,
                                      float x, float y, float width,
                                      String[] rowData, float[] columnWidths) throws IOException {

@@ -22,6 +22,12 @@ public class AuthorizationController {
     @FXML
     private PasswordField passwordInput;
 
+    /**
+     * Обрабатывает кнопку авторизации.
+     * Проверяет email и пароль, авторизует пользователя.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onAuthButtonClick() throws Exception {
         String email = mailInput.getText().trim();
@@ -54,6 +60,9 @@ public class AuthorizationController {
             SceneManager.switchToStudentDashboard();
     }
 
+    /**
+     * Обрабатывает кнопку перехода на сцену регистрации.
+     */
     @FXML
     private void onRegButtonClick() {
         mailInput.clear();
@@ -62,6 +71,12 @@ public class AuthorizationController {
         System.out.println("Кнопка Регистрация нажата!");
     }
 
+    /**
+     * Отображает диалог с сообщением.
+     *
+     * @param message текст сообщения
+     * @param type тип алерта
+     */
     private void showAlert(String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle("Ошибка");

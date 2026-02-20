@@ -10,6 +10,12 @@ import java.util.List;
 
 public class RestDAOPSql implements RestDAO {
 
+    /**
+     * Устанавливает запись об отдыхе в базу данных.
+     *
+     * @param rest объект Rest для сохранения
+     * @throws SQLException если ошибка базы данных
+     */
     public void create(Rest rest) throws SQLException {
         String sql = """
             INSERT INTO rests(date, student_id, hours)
@@ -27,6 +33,12 @@ public class RestDAOPSql implements RestDAO {
         }
     }
 
+    /**
+     * Обновляет запись об отдыхе в базе.
+     *
+     * @param rest объект Rest с новыми данными
+     * @throws SQLException если ошибка базы данных
+     */
     public void update(Rest rest) throws SQLException {
         String sql = """
             UPDATE rests SET date=?, student_id=?, hours=?
@@ -45,6 +57,12 @@ public class RestDAOPSql implements RestDAO {
         }
     }
 
+    /**
+     * Удаляет запись об отдыхе по ID.
+     *
+     * @param id ID записи
+     * @throws SQLException если ошибка базы данных
+     */
     public void delete(Long id) throws SQLException {
         String sql = "DELETE FROM rests WHERE id = ?";
 
@@ -56,6 +74,13 @@ public class RestDAOPSql implements RestDAO {
         }
     }
 
+    /**
+     * Находит все записи об отдыхе студента.
+     *
+     * @param studentId ID студента
+     * @return лист Rest объектов
+     * @throws SQLException если ошибка базы
+     */
     @Override
     public List<Rest> findByStudentId(Long studentId) throws SQLException {
         String sql = "SELECT id, date, student_id, hours FROM rests WHERE student_id = ? ORDER BY date DESC";
@@ -75,6 +100,13 @@ public class RestDAOPSql implements RestDAO {
         return rests;
     }
 
+    /**
+     * Мапит результат SQL запроса в объект Rest.
+     *
+     * @param rs ResultSet от SQL запроса
+     * @return Rest объект
+     * @throws SQLException если ошибка данных
+     */
     private Rest map(ResultSet rs) throws SQLException {
         Rest r = new Rest();
         r.setId(rs.getLong("id"));

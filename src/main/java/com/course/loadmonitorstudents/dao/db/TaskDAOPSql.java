@@ -41,7 +41,7 @@ public class TaskDAOPSql implements TaskDAO {
     public void create(Task task) throws SQLException {
         String sql = """
                         INSERT INTO tasks(title, description, deadline, start_work, end_work, status, student_id, curator_id) 
-                        VALUES (?, ?, ?, ?, ?, ?::status_task_type, ?, ?)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                      """;
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -64,7 +64,7 @@ public class TaskDAOPSql implements TaskDAO {
     public void update(Task task) throws SQLException {
         String sql = """
                         UPDATE tasks SET title=?, description=?, deadline=?, start_work=?, end_work=?, 
-                                         status=?::status_task_type, student_id=?, curator_id=? 
+                                         status=?, student_id=?, curator_id=? 
                         WHERE id=? 
                      """;
 
@@ -202,7 +202,7 @@ public class TaskDAOPSql implements TaskDAO {
                             u.firstname, 
                             u.id as student_id 
                         FROM tasks t JOIN users u ON t.student_id = u.id 
-                        WHERE t.curator_id = ? AND t.status = ?::status_task_type 
+                        WHERE t.curator_id = ? AND t.status = ? 
                         ORDER BY t.deadline %s, t.id %s " +
                         """, order, order);
 
@@ -351,7 +351,7 @@ public class TaskDAOPSql implements TaskDAO {
                                             u.firstname as curator_first_name, u.lastname as curator_last_name
                                         FROM tasks t
                                         JOIN users u ON t.curator_id = u.id
-                                        WHERE t.student_id = ? AND t.status = ?::status_task_type
+                                        WHERE t.student_id = ? AND t.status = ?
                                         ORDER BY t.deadline %s, t.id %s
                                     """, order, order);
 

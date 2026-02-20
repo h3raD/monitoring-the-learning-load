@@ -1,6 +1,9 @@
 package com.course.loadmonitorstudents.service;
 
+import com.course.loadmonitorstudents.config.ApplicationConfig;
+import com.course.loadmonitorstudents.dao.RestDAO;
 import com.course.loadmonitorstudents.dao.UserDAO;
+import com.course.loadmonitorstudents.dao.db.RestDAOPSql;
 import com.course.loadmonitorstudents.dao.db.UserDAOPSql;
 import com.course.loadmonitorstudents.model.Task;
 import com.course.loadmonitorstudents.model.User;
@@ -11,19 +14,24 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class TelegramNotificationService {
-    private static final String BOT_TOKEN = "8063383111:AAF6_U_WhyAgOd6-lF_xrT6ua-8f8GieCWw";
+    private static final String BOT_TOKEN = ApplicationConfig.getTelegramBotToken();
+    private static final int DAILY_SLEEP_NORM_MIN = 7;
+    private static final int DAILY_SLEEP_NORM_MAX = 8;
 
     private static TelegramNotificationService instance;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private boolean isRunning = false;
     private final UserDAO userDAO = new UserDAOPSql();
+    private final RestDAO restDAO = new RestDAOPSql();
 
     private TelegramNotificationService() {}
 
@@ -98,23 +106,158 @@ public class TelegramNotificationService {
 
     public void notifySleepRecommendation(Long studentId, int sleepHours) {
         String recommendation;
-        if (sleepHours < 6) {
-            recommendation = "⚠️ <b>Внимание!</b> Вы спите менее 6 часов. Рекомендуется увеличить время сна для поддержания продуктивности.";
-        } else if (sleepHours > 9) {
-            recommendation = "ℹ️ Вы спите более 9 часов. Возможно, стоит сократить время сна для лучшего самочувствия.";
+        if (sleepHours < DAILY_SLEEP_NORM_MIN) {
+            recommendation = "⚠️ <b>Внимание!</b> Вы спали " + sleepHours + " часов. Это меньше нормы (7-8 часов). Рекомендуется увеличить время сна!";
+        } else if (sleepHours > DAILY_SLEEP_NORM_MAX) {
+            recommendation = "ℹ️ Вы спали " + sleepHours + " часов. Это больше нормы (7-8 часов). Рекомендуется немного сократить время сна.";
         } else {
-            recommendation = "✅ Отличный результат! Вы соблюдаете рекомендуемую норму сна (7-8 часов).";
+            recommendation = "✅ Отличный результат! Вы спали " + sleepHours + " часов - это идеальная норма! 🎉";
         }
 
         String message = String.format(
-                "<b>😴 Рекомендация по сну</b>%n%n" +
-                        "<b>📊 Ваши часы сна:</b> %d часов%n" +
-                        "<b>💡 Рекомендация:</b> %s%n%n" +
-                        "Здоровый сон = продуктивная учёба!",
+                "<b>😴 Статистика сна</b>%n%n" +
+                        "<b>📊 Сегодняшний сон:</b> %d часов%n" +
+                        "<b>💡 Оценка:</b> %s%n%n" +
+                        "Помните: здоровый сон - залог продуктивности!",
                 sleepHours, recommendation
         );
 
         sendNotificationToStudent(studentId, message);
+        
+        sendWeeklySleepStats(studentId);
+    }
+
+    private void sendWeeklySleepStats(Long studentId) {
+        try {
+            List<com.course.loadmonitorstudents.model.Rest> allRests = restDAO.findByStudentId(studentId);
+            
+            if (allRests == null || allRests.isEmpty()) {
+                return;
+            }
+
+            java.util.Collections.sort(allRests, (a, b) -> b.getDate().compareTo(a.getDate()));
+
+            LocalDate today = LocalDate.now();
+            com.course.loadmonitorstudents.model.Rest todayRest = null;
+            
+            for (com.course.loadmonitorstudents.model.Rest rest : allRests) {
+                if (rest.getDate().equals(today)) {
+                    todayRest = rest;
+                    break;
+                }
+            }
+
+            if (todayRest != null) {
+                int sleepHours = todayRest.getHours();
+                String dayInfo;
+                
+                if (sleepHours < DAILY_SLEEP_NORM_MIN) {
+                    dayInfo = String.format(
+                        "⚠️ <b>Вы спали МАЛО в этот день!</b>%n" +
+                        "📅 Дата: %s%n" +
+                        "😴 Часов сна: %d (норма: 7-8)%n%n",
+                        today, sleepHours
+                    );
+                } else if (sleepHours > DAILY_SLEEP_NORM_MAX) {
+                    dayInfo = String.format(
+                        "ℹ️ Вы спали МНОГО в этот день%n" +
+                        "📅 Дата: %s%n" +
+                        "😴 Часов сна: %d (норма: 7-8)%n%n",
+                        today, sleepHours
+                    );
+                } else {
+                    dayInfo = String.format(
+                        "✅ <b>Вы спали НОРМАЛЬНО в этот день!</b>%n" +
+                        "📅 Дата: %s%n" +
+                        "😴 Часов сна: %d (норма: 7-8) 🎉%n%n",
+                        today, sleepHours
+                    );
+                }
+
+                String message = String.format(
+                    "<b>😴 Статистика сна на сегодня</b>%n%n%s" +
+                    "<i>Здоровый сон = продуктивная учёба!</i>",
+                    dayInfo
+                );
+
+                sendNotificationToStudent(studentId, message);
+            }
+
+            if (allRests.size() < 7) {
+                return;
+            }
+
+            java.util.List<com.course.loadmonitorstudents.model.Rest> last7Days = new java.util.ArrayList<>();
+            LocalDate checkDate = today;
+
+            for (int i = 0; i < 7; i++) {
+                boolean found = false;
+                for (com.course.loadmonitorstudents.model.Rest rest : allRests) {
+                    if (rest.getDate().equals(checkDate)) {
+                        last7Days.add(rest);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return;
+                }
+                checkDate = checkDate.minusDays(1);
+            }
+
+            int totalSleep = 0;
+            for (com.course.loadmonitorstudents.model.Rest rest : last7Days) {
+                totalSleep += rest.getHours();
+            }
+
+            double avgSleep = (double) totalSleep / 7;
+
+            String weeklyRecommendation;
+            String emoji;
+            
+            if (avgSleep < DAILY_SLEEP_NORM_MIN) {
+                emoji = "⚠️";
+                weeklyRecommendation = String.format(
+                    "<b>ВЫ НЕ СПИТЕ НОРМАЛЬНО!</b> За всю неделю вы спали в среднем всего %.1f часов/сутки. " +
+                    "Норма: 7-8 часов. Срочно добавьте сна!", 
+                    avgSleep
+                );
+            } else if (avgSleep > DAILY_SLEEP_NORM_MAX) {
+                emoji = "ℹ️";
+                weeklyRecommendation = String.format(
+                    "За всю неделю вы спали в среднем %.1f часов/сутки - это больше нормы (7-8 часов). " +
+                    "Постарайтесь немного сократить.", 
+                    avgSleep
+                );
+            } else {
+                emoji = "✅";
+                weeklyRecommendation = String.format(
+                    "<b>Отлично!</b> За всю неделю вы спали нормально - в среднем %.1f часов/сутки. " +
+                    "Продолжайте в том же духе! 🎯", 
+                    avgSleep
+                );
+            }
+
+            String message = String.format(
+                    "<b>%s 📊 Статистика сна за неделю</b>%n%n" +
+                            "<b>Всего часов:</b> %d часов за 7 суток%n" +
+                            "<b>Среднее в сутки:</b> %.1f часов%n" +
+                            "<b>Норма:</b> 7-8 часов/сутки%n%n" +
+                            "<b>📈 Оценка:</b> %s%n%n" +
+                            "<i>Здоровый сон - залог успеха! 💪</i>",
+                    emoji, totalSleep, avgSleep, weeklyRecommendation
+            );
+
+            Thread.sleep(1000);
+            sendNotificationToStudent(studentId, message);
+
+        } catch (SQLException e) {
+            System.err.println("❌ Ошибка БД при получении данных сна: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            System.err.println("❌ Ошибка при отправке статистики сна: " + e.getMessage());
+        }
     }
 
     private void sendHtmlMessage(Long chatId, String htmlText) {

@@ -42,14 +42,26 @@ public class GoogleCalendarService {
     private static final String APPLICATION_NAME = "CourseTP";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
-    private static final String CALENDAR_ID = ApplicationConfig.googleindent;
+    private static String CALENDAR_ID;
+    
+    static {
+        CALENDAR_ID = ApplicationConfig.getGoogleCalendarId();
+    }
+    
     private static final List<String> SCOPES = Collections.singletonList(CalendarScopes.CALENDAR_EVENTS);
     private static final String CREDENTIALS_FILE_PATH = "/com/course/loadmonitorstudents/google/secret.json";
-    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+    private static final String REDIRECT_URI = "http://localhost";
 
     private final Calendar calendarService;
     private GoogleClientSecrets clientSecrets;
 
+    /**
+     * Конструктор Google Calendar сервиса.
+     * Подключается к Google API для работы с календарем.
+     *
+     * @throws GeneralSecurityException если проблема безопасности
+     * @throws IOException если проблема в О/В
+     */
     public GoogleCalendarService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
@@ -78,6 +90,14 @@ public class GoogleCalendarService {
         return secrets;
     }
 
+    /**
+     * Получает удостоверение для Google Calendar.
+     *
+     * @param HTTP_TRANSPORT новый транспорт
+     * @param clientSecrets секреты клиента
+     * @return удостоверение
+     * @throws IOException если ошибка при авторизации
+     */
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT,
                                       GoogleClientSecrets clientSecrets) throws IOException {
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
@@ -95,6 +115,14 @@ public class GoogleCalendarService {
         return authorizeWithDialog(flow, clientSecrets);
     }
 
+    /**
+     * Авторизуется через диалоговые окна.
+     *
+     * @param flow поток авторизации
+     * @param clientSecrets секреты клиента
+     * @return удостоверение
+     * @throws IOException если авторизация не успешна
+     */
     private Credential authorizeWithDialog(GoogleAuthorizationCodeFlow flow,
                                            GoogleClientSecrets clientSecrets) throws IOException {
         String authorizationUrl = flow.newAuthorizationUrl()
@@ -161,6 +189,11 @@ public class GoogleCalendarService {
         });
     }
 
+    /**
+     * Попросит код авторизации аз диалога.
+     *
+     * @return код авторизации или пост строка
+     */
     private String getAuthorizationCodeFromDialog() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Код авторизации");
@@ -173,6 +206,12 @@ public class GoogleCalendarService {
         return result.orElse("");
     }
 
+    /**
+     * Получает InputStream для ресурса.
+     *
+     * @param path путь к ресурсу
+     * @return InputStream или null
+     */
     private InputStream getResourceAsStream(String path) {
         InputStream stream = getClass().getResourceAsStream(path);
 
@@ -188,6 +227,13 @@ public class GoogleCalendarService {
         return stream;
     }
 
+    /**
+     * Создает событие в Google Calendar.
+     *
+     * @param task задача для сохранения
+     * @return ID созданного события
+     * @throws IOException если ошибка на Google API
+     */
     public String createTaskEvent(Task task) throws IOException {
         Event event = new Event()
                 .setSummary(createEventSummary(task))
@@ -222,6 +268,11 @@ public class GoogleCalendarService {
         }
     }
 
+    /**
+     * Отображает диалог успеха.
+     *
+     * @param createdEvent созданное событие
+     */
     private void showSuccessDialog(Event createdEvent) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Событие создано");
@@ -243,6 +294,12 @@ public class GoogleCalendarService {
         alert.showAndWait();
     }
 
+    /**
+     * Отображает диалог ошибки.
+     *
+     * @param title заголовок
+     * @param message сообщение
+     */
     private void showErrorDialog(String title, String message) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Ошибка");
@@ -251,6 +308,12 @@ public class GoogleCalendarService {
         alert.showAndWait();
     }
 
+    /**
+     * Обрабатывает ошибки Google Calendar апи.
+     *
+     * @param e исключение ошибки
+     * @throws IOException выбрасывает исключение
+     */
     private void handleGoogleCalendarError(IOException e) throws IOException {
         String message = e.getMessage();
 
@@ -274,6 +337,12 @@ public class GoogleCalendarService {
         throw new IOException("Ошибка Google Calendar: " + message, e);
     }
 
+    /**
+     * Составляет заголовок события.
+     *
+     * @param task задача
+     * @return заголовок
+     */
     private String createEventSummary(Task task) {
         return String.format("[%s] %s",
                 task.getStatus().name().replace("_", " "),
@@ -281,6 +350,12 @@ public class GoogleCalendarService {
         );
     }
 
+    /**
+     * Составляет описание события.
+     *
+     * @param task задача
+     * @return описание
+     */
     private String createEventDescription(Task task) {
         StringBuilder description = new StringBuilder();
         description.append("Описание: ").append(task.getDescription()).append("\n\n");
@@ -342,6 +417,9 @@ public class GoogleCalendarService {
         }
     }
 
+    /**
+     * Отображает диалог с информацией.
+     */
     public void showInfoDialog() {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Информация о Google Calendar");
@@ -352,6 +430,13 @@ public class GoogleCalendarService {
         alert.showAndWait();
     }
 
+    /**
+     * Авторизуется вручную для Google Calendar.
+     *
+     * @return удостоверение
+     * @throws IOException если ошибка
+     * @throws GeneralSecurityException если проблема безопасности
+     */
     public static Credential authorizeManually() throws IOException, GeneralSecurityException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 

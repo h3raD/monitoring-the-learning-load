@@ -131,6 +131,10 @@ public class CuratorController {
 
     @FXML
     public void initialize() {
+        /**
+         * Инициализирует контроллер.
+         * Настраивает таблицы и загружает данные.
+         */
         setupStudentTableColumns();
         setupTaskTableColumns();
         initializeFilterComboBox();
@@ -138,6 +142,9 @@ public class CuratorController {
         loadStudentsToTable();
     }
 
+    /**
+     * Настраивает колонки таблицы студентов.
+     */
     private void setupStudentTableColumns() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
@@ -146,6 +153,9 @@ public class CuratorController {
         passwordColumn.setCellValueFactory(new PropertyValueFactory<>("password"));
     }
 
+    /**
+     * Настраивает колонки таблицы задач.
+     */
     private void setupTaskTableColumns() {
         taskIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         taskTitleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -178,12 +188,24 @@ public class CuratorController {
         taskStudentIdColumn.setCellValueFactory(new PropertyValueFactory<>("studentId"));
     }
 
+    /**
+     * Форматирует дату-время в читаемый вид.
+     *
+     * @param dateTime дата-время
+     * @return отформатированная строка
+     */
     private String formatDateTime(LocalDateTime dateTime) {
         if (dateTime == null)
             return "";
         return dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
     }
 
+    /**
+     * Обрабатывает нажатие кнопки добавления студента.
+     * Проверяет данные и сохраняет нового пользователя.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onAddButtonsClick() throws Exception {
         String mail = mailInput.getText().trim();
@@ -232,6 +254,11 @@ public class CuratorController {
         showAlert("Успех", "Регистрация студента прошла успешно!", Alert.AlertType.INFORMATION);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки обновления данных студента.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onUpdateButtonsClick() throws Exception {
         String id = idInputs.getText().trim();
@@ -278,6 +305,11 @@ public class CuratorController {
         showAlert("Успех", "Студент обновлён", Alert.AlertType.WARNING);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки удаления студента.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onDeleteButtonsClick() throws Exception {
         String id = idInputs.getText().trim();
@@ -305,6 +337,11 @@ public class CuratorController {
         showAlert("Успех", "Студент удалён", Alert.AlertType.WARNING);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки добавления задачи.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onAddButtontClick() throws Exception {
         String title = titleInput.getText().trim();
@@ -342,47 +379,65 @@ public class CuratorController {
         showAlert("Успех", "Задача добавлена", Alert.AlertType.WARNING);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки изменения задачи.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onUpdateButtontClick() throws Exception {
-        String id  = idInputt.getText().trim();
+        String taskId = idInputt.getText().trim();
         String title = titleInput.getText().trim();
         String description = descriptionInput.getText().trim();
         String status = statusInput.getValue();
         String deadline = deadlineInput.getText().trim();
-        String idStudent = studentIdInput.getText().trim();
 
-        if (id.isEmpty() || (title.isEmpty() && description.isEmpty() && status.isEmpty() && deadline.isEmpty() && idStudent.isEmpty())) {
-            showAlert("Ошибка", "Заполните поля", Alert.AlertType.WARNING);
+        if (taskId.isEmpty()) {
+            showAlert("Ошибка", "Заполните ID задачи", Alert.AlertType.WARNING);
             return;
         }
 
-        if (!isId(idStudent)) {
-            showAlert("Ошибка", "id студента - положительное числовое значение", Alert.AlertType.WARNING);
+        if (!isId(taskId)) {
+            showAlert("Ошибка", "ID задачи - положительное числовое значение", Alert.AlertType.WARNING);
+            return;
+        }
+
+        Task task = taskDAO.getById(Long.parseLong(taskId));
+        if (task == null) {
+            showAlert("Ошибка", "Задача не найдена", Alert.AlertType.WARNING);
             return;
         }
 
         Long idCurator = ApplicationConfig.getCurrentUserId();
-        User user = userDAO.findByIdAndCuratorId(Long.parseLong(idStudent), idCurator);
-        if (user == null) {
-            showAlert("Ошибка", "Студент не найден", Alert.AlertType.WARNING);
+        if (!task.getCuratorId().equals(idCurator)) {
+            showAlert("Ошибка", "У Вас нет прав на редактирование этой задачи", Alert.AlertType.WARNING);
             return;
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        if (!checkDate(deadline, formatter)) {
-            showAlert("Ошибка", "Дата не соответствует формату: dd.MM.yyyy HH:mm:ss", Alert.AlertType.WARNING);
-            return;
+        if (!title.isEmpty()) {
+            task.setTitle(title);
+        }
+        if (!description.isEmpty()) {
+            task.setDescription(description);
+        }
+        if (status != null && !status.isEmpty()) {
+            task.setStatus(StatusTask.valueOf(status));
+        }
+        if (!deadline.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+            if (!checkDate(deadline, formatter)) {
+                showAlert("Ошибка", "Дата не соответствует формату: dd.MM.yyyy HH:mm:ss", Alert.AlertType.WARNING);
+                return;
+            }
+            LocalDateTime deadlinedate = LocalDateTime.parse(deadline, formatter);
+            LocalDateTime now = LocalDateTime.now();
+            if (deadlinedate.isBefore(now)) {
+                showAlert("Ошибка", "Дата и время дедлайна не может быть раньше текущего времени", Alert.AlertType.WARNING);
+                return;
+            }
+            task.setDeadline(deadlinedate);
         }
 
-        LocalDateTime deadlinedate = LocalDateTime.parse(deadline, formatter);
-        LocalDateTime now = LocalDateTime.now();
-
-        if (deadlinedate.isBefore(now)) {
-            showAlert("Ошибка", "Дата и время дедлайна не может быть раньше даты и времени создания задачи", Alert.AlertType.WARNING);
-            return;
-        }
-
-        Task task = new Task(-1L, title, description, now, deadlinedate, null, null, StatusTask.valueOf(status), user.getId(), idCurator);
         taskDAO.update(task);
         TelegramNotificationService.getInstance().sendNotificationToStudent(
                 task.getStudentId(),
@@ -395,9 +450,14 @@ public class CuratorController {
 
         loadTasksToTable();
         clearInputFieldsTasks();
-        showAlert("Успех", "Задача добавлена", Alert.AlertType.WARNING);
+        showAlert("Успех", "Задача обновлена успешно", Alert.AlertType.INFORMATION);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки удаления задачи.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onDeleteButtontClick() throws Exception {
         String id  = idInputt.getText().trim();
@@ -426,6 +486,11 @@ public class CuratorController {
         showAlert("Успех", "Студент удалён", Alert.AlertType.WARNING);
     }
 
+    /**
+     * Обрабатывает нажатие кнопки фильтрации задачи.
+     *
+     * @throws Exception если ошибка базы данных
+     */
     @FXML
     private void onTaskFilterButtonClick() throws Exception {
         try {
@@ -499,6 +564,11 @@ public class CuratorController {
         }
     }
 
+    /**
+     * Обрабатывает нажатие кнопки генерации отчёта.
+     *
+     * @throws Exception если ошибка генерации отчёта
+     */
     @FXML
     private void onGeneratePdfButtonClick() throws Exception {
         try {
@@ -567,6 +637,13 @@ public class CuratorController {
         }
     }
 
+    /**
+     * Отображает диалог.
+     *
+     * @param title заголовок
+     * @param message текст
+     * @param type тип
+     */
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -575,6 +652,9 @@ public class CuratorController {
         alert.showAndWait();
     }
 
+    /**
+     * Загружает список студентов в таблицу.
+     */
     private void loadStudentsToTable() {
         try {
             Long currentCuratorId = ApplicationConfig.getCurrentUserId();
@@ -592,6 +672,9 @@ public class CuratorController {
         }
     }
 
+    /**
+     * Загружает список задач в таблицу.
+     */
     private void loadTasksToTable() {
         try {
             Long currentCuratorId = ApplicationConfig.getCurrentUserId();
@@ -605,6 +688,9 @@ public class CuratorController {
         }
     }
 
+    /**
+     * Очищает все поля ввода для студентов.
+     */
     private void clearInputFieldsStudents() {
         idInputs.clear();
         mailInput.clear();
@@ -613,6 +699,9 @@ public class CuratorController {
         surnameInput.clear();
     }
 
+    /**
+     * Очищает все поля ввода для задач.
+     */
     private void clearInputFieldsTasks() {
         idInputt.clear();
         statusInput.setValue(null);
@@ -622,6 +711,11 @@ public class CuratorController {
         studentIdInput.clear();
     }
 
+    /**
+     * Получает статус для фильтрации.
+     *
+     * @return статус для фильтра
+     */
     private String getStatusForFilter() {
         if (statusInput != null) {
             return statusInput.getValue();
@@ -638,6 +732,11 @@ public class CuratorController {
         return result.orElse(null);
     }
 
+    /**
+     * Обновляет таблицу задач.
+     *
+     * @param tasks лист задач
+     */
     private void updateTaskTable(List<TaskWithStudentDTO> tasks) {
         taskData.clear();
         if (tasks != null && !tasks.isEmpty())
@@ -647,6 +746,9 @@ public class CuratorController {
         taskTable.refresh();
     }
 
+    /**
+     * Инициализирует комбобокс для работы с новыми статусами.
+     */
     private void initializeFilterComboBox() {
         if (statusInput != null) {
             statusInput.getItems().addAll(

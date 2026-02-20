@@ -7,6 +7,13 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class LoadMonitor extends Application {
+    /**
+     * Инициализирует главное окно приложения с параметрами.
+     * Устанавливает минимальный размер и переключает сцену на авторизацию.
+     *
+     * @param primaryStage главная сцена приложения
+     * @throws IOException если произойдет ошибка при загрузке сцены
+     */
     @Override
     public void start(Stage primaryStage) throws IOException {
         primaryStage.setMinWidth(400);

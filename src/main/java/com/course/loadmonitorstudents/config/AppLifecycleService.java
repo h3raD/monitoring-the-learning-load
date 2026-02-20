@@ -6,6 +6,10 @@ import com.course.loadmonitorstudents.service.TelegramNotificationService;
 public class AppLifecycleService {
     private static volatile boolean isInitialized = false;
 
+    /**
+     * Инициализирует телеграм сервисы приложения.
+     * Запускает Telegram бот и фоновые мониторинг процессы.
+     */
     public static synchronized void initialize() {
         if (!isInitialized) {
             System.out.println(" Инициализация Telegram сервисов...");
@@ -19,6 +23,9 @@ public class AppLifecycleService {
         }
     }
 
+    /**
+     * Останавливает все Telegram сервисы приложения.
+     */
     public static synchronized void shutdown() {
         if (isInitialized) {
             System.out.println(" Остановка Telegram сервисов...");

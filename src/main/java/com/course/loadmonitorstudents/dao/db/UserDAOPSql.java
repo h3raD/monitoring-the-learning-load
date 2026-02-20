@@ -22,8 +22,13 @@ public class UserDAOPSql implements UserDAO {
         u.setFirstName(rs.getString("firstName"));
         u.setLastName(rs.getString("lastName"));
         u.setRole(Role.valueOf(rs.getString("role")));
-        u.setCuratorId((Long)rs.getObject("curator_id"));
-        u.setTelegramID((Long)rs.getObject("telegram_id"));
+        
+        Long curatorId = rs.getLong("curator_id");
+        u.setCuratorId(rs.wasNull() ? null : curatorId);
+        
+        Long telegramId = rs.getLong("telegram_id");
+        u.setTelegramID(rs.wasNull() ? null : telegramId);
+        
         u.setGoogleCalendarApiKey(rs.getString("google_calendar_api_key"));
         return u;
     }
@@ -31,7 +36,7 @@ public class UserDAOPSql implements UserDAO {
     public void create(User user) throws SQLException {
         String sql = """
         INSERT INTO users(email, password, firstName, lastName, role, curator_id, telegram_id, google_calendar_api_key)
-        VALUES (?, ?, ?, ?, ?::role_type, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """;
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -54,7 +59,7 @@ public class UserDAOPSql implements UserDAO {
 
     public void update(User user) throws SQLException {
         String sql = """
-        UPDATE users SET email=?, password=?, firstName=?, lastName=?, role=?::role_type,
+        UPDATE users SET email=?, password=?, firstName=?, lastName=?, role=?,
                          curator_id=?, telegram_id=?, google_calendar_api_key=?
         WHERE id=?
     """;
